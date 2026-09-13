@@ -264,12 +264,36 @@ func printSettings(ser *settings.Server, set *settings.Settings, auther auth.Aut
 
 	w.Flush()
 
-	b, err := json.MarshalIndent(auther, "", "  ")
+	b, err := json.MarshalIndent(redactAuther(auther), "", "  ")
 	if err != nil {
 		return err
 	}
 	fmt.Printf("\nAuther configuration (raw):\n\n%s\n\n", string(b))
 	return nil
+}
+
+// redactedSecret replaces secret values in printed configuration.
+const redactedSecret = "(redacted)"
+
+// redactAuther returns a copy of auther that is safe to print, with any
+// secrets masked. Use "filebrowser config export" to get the real values.
+func redactAuther(auther auth.Auther) auth.Auther {
+	var a auth.JSONAuth
+	switch v := auther.(type) {
+	case *auth.JSONAuth:
+		a = *v
+	case auth.JSONAuth:
+		a = v
+	default:
+		return auther
+	}
+
+	if a.ReCaptcha != nil && a.ReCaptcha.Secret != "" {
+		reCaptcha := *a.ReCaptcha
+		reCaptcha.Secret = redactedSecret
+		a.ReCaptcha = &reCaptcha
+	}
+	return &a
 }
 
 func getSettings(flags *pflag.FlagSet, set *settings.Settings, ser *settings.Server, auther auth.Auther, all bool) (auth.Auther, error) {

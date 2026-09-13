@@ -13,11 +13,21 @@ import (
 
 // ScopedFs is an afero.Fs that confines every operation to a base directory and
 // refuses to follow a symbolic link whose on-disk target resolves outside that
-// base. It wraps an *afero.BasePathFs — which already provides the lexical
-// confinement — and adds a per-operation scope check on every call that would
-// dereference a symlink at the OS layer (open, stat, lstat, chmod, …).
+// base. It wraps an *afero.BasePathFs and adds a per-operation scope check on
+// every call that would dereference a symlink at the OS layer (open, stat,
+// lstat, chmod, …).
+//
+// The BasePathFs alone is not enough for lexical confinement either: it checks
+// the joined path with a plain string prefix, so "../user2/file" in a scope of
+// "/srv/user" resolves to "/srv/user2/file" and is accepted. ScopedFs rejects
+// such names even when followExternal is set.
 type ScopedFs struct {
 	base *afero.BasePathFs
+
+	// followExternal skips the symlink check, so symlinks whose target
+	// resolves outside the scope are followed. Names that lexically climb
+	// out of the scope are still rejected.
+	followExternal bool
 }
 
 var (
@@ -31,20 +41,24 @@ var (
 const maxSymlinkHops = 255
 
 func NewScopedFs(source afero.Fs, path string) *ScopedFs {
+	return newScopedFs(source, path, false)
+}
+
+func newScopedFs(source afero.Fs, path string, followExternal bool) *ScopedFs {
 	if s, ok := source.(*ScopedFs); ok {
 		source = s.base
 	}
-	return &ScopedFs{base: afero.NewBasePathFs(source, path).(*afero.BasePathFs)}
+	return &ScopedFs{
+		base:           afero.NewBasePathFs(source, path).(*afero.BasePathFs),
+		followExternal: followExternal,
+	}
 }
 
-// NewFs builds a user filesystem rooted at path. When followExternal is true it
-// returns a bare BasePathFs, so symlinks whose target resolves outside the scope
-// are followed; otherwise it returns a ScopedFs that refuses to follow them.
+// NewFs builds a user filesystem rooted at path. When followExternal is true,
+// symlinks whose target resolves outside the scope are followed; otherwise they
+// are refused. Either way, names that climb out of the scope are rejected.
 func NewFs(source afero.Fs, path string, followExternal bool) afero.Fs {
-	if followExternal {
-		return afero.NewBasePathFs(source, path)
-	}
-	return NewScopedFs(source, path)
+	return newScopedFs(source, path, followExternal)
 }
 
 // BasePath returns the underlying *afero.BasePathFs of a user filesystem built
@@ -67,11 +81,21 @@ func (s *ScopedFs) BasePathFs() *afero.BasePathFs { return s.base }
 // the underlying BasePathFs. This is needed by callers that need the actual
 // filesystem path (e.g. disk.UsageWithContext).
 func (s *ScopedFs) RealPath(name string) (string, error) {
+	if !s.lexicallyWithin(name) {
+		return name, os.ErrPermission
+	}
 	return s.base.RealPath(name)
 }
 
-// guard returns an error if name's on-disk target resolves outside the scope.
+// guard returns an error if name lexically climbs out of the scope or, unless
+// followExternal is set, if its on-disk target resolves outside the scope.
 func (s *ScopedFs) guard(name string) error {
+	if !s.lexicallyWithin(name) {
+		return os.ErrPermission
+	}
+	if s.followExternal {
+		return nil
+	}
 	ok, err := s.within(name)
 	if err != nil {
 		return err
@@ -80,6 +104,13 @@ func (s *ScopedFs) guard(name string) error {
 		return os.ErrPermission
 	}
 	return nil
+}
+
+// lexicallyWithin reports whether p, joined to the scoped root without
+// resolving symlinks, stays within the root.
+func (s *ScopedFs) lexicallyWithin(p string) bool {
+	root := filepath.Clean(afero.FullBaseFsPath(s.base, "/"))
+	return underRoot(filepath.Clean(afero.FullBaseFsPath(s.base, p)), root)
 }
 
 // within reports whether the on-disk target of p — after resolving any symbolic
@@ -144,6 +175,11 @@ func (s *ScopedFs) within(p string) (bool, error) {
 		return false, err
 	}
 
+	return underRoot(resolved, root), nil
+}
+
+// underRoot reports whether the clean path p is root or inside it.
+func underRoot(p, root string) bool {
 	// Compare against root with a trailing separator so a sibling like
 	// "/srvother" is not treated as being inside "/srv". When root is itself the
 	// filesystem boundary (e.g. "/"), it already ends in a separator, so avoid
@@ -153,7 +189,7 @@ func (s *ScopedFs) within(p string) (bool, error) {
 		prefix += string(filepath.Separator)
 	}
 
-	return resolved == root || strings.HasPrefix(resolved, prefix), nil
+	return p == root || strings.HasPrefix(p, prefix)
 }
 
 func (s *ScopedFs) Create(name string) (afero.File, error) {

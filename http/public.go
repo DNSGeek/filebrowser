@@ -64,10 +64,10 @@ var withHashFile = func(fn handleFunc) handleFunc {
 			filePath = ifPath
 		}
 
-		// set fs root to the shared file/folder. Unless external symlinks are
-		// explicitly allowed, this is a ScopedFs (not a bare BasePathFs) so the
-		// share is also symlink-confined: a link inside the shared subtree that
-		// points elsewhere in the owner's scope — outside the share — must not be
+		// set fs root to the shared file/folder. Paths can never climb out of the
+		// share, and unless external symlinks are explicitly allowed the share is
+		// also symlink-confined: a link inside the shared subtree that points
+		// elsewhere in the owner's scope — outside the share — must not be
 		// followed.
 		d.user.Fs = files.NewFs(d.user.Fs, basePath, d.server.FollowExternalSymlinks)
 

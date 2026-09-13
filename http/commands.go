@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	"slices"
 	"strings"
 	"time"
 
@@ -69,7 +68,7 @@ var commandsHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *d
 		return 0, nil
 	}
 
-	command, name, err := runner.ParseCommand(d.settings, raw)
+	command, allowed, err := runner.ParseUserCommand(d.settings, raw, d.user.Commands)
 	if err != nil {
 		if err := conn.WriteMessage(websocket.TextMessage, []byte(err.Error())); err != nil {
 			wsErr(conn, r, http.StatusInternalServerError, err)
@@ -77,7 +76,7 @@ var commandsHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *d
 		return 0, nil
 	}
 
-	if !slices.Contains(d.user.Commands, name) {
+	if !allowed {
 		if err := conn.WriteMessage(websocket.TextMessage, cmdNotAllowed); err != nil {
 			wsErr(conn, r, http.StatusInternalServerError, err)
 		}
