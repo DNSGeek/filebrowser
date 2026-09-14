@@ -16,20 +16,20 @@ for arg in "$@"; do
     break
   fi
   case "$arg" in
-    -c|--config)
+    -c | --config)
       next_is_config=1
       ;;
-    -c=*|--config=*)
+    -c=* | --config=*)
       config_file="${arg#*=}"
       break
       ;;
   esac
 done
 
-# If no config argument is provided, set the default and add it to the args                                                                 
-if [ -z "$config_file" ]; then 
-  config_file="/config/settings.json"                                                                                                                                                                                                 
-  set -- --config=/config/settings.json "$@"                                                                                                       
-fi                                                                                                                                                                                                                                                                                                                                                             
+# If no config argument is provided, set the default and add it to the args
+if [ -z "$config_file" ]; then
+  config_file="/config/settings.json"
+  set -- --config=/config/settings.json "$@"
+fi
 
 exec filebrowser "$@"
