@@ -8,19 +8,19 @@
 
 The hook runner is a feature that enables you to execute any shell command you want before or after a certain event. Right now, these are the events:
 
-* Copy
-* Rename
-* Upload
-* Delete
-* Save
+- Copy
+- Rename
+- Upload
+- Delete
+- Save
 
 Also, during the execution of the commands set for those hooks, there will be some environment variables available to help you perform your commands:
 
-* `FILE` with the full absolute path to the changed file.
-* `SCOPE` with the path to user's scope.
-* `TRIGGER` with the name of the event.
-* `USERNAME` with the user's username.
-* `DESTINATION` with the absolute path to the destination. Only used for **copy** and **rename.**
+- `FILE` with the full absolute path to the changed file.
+- `SCOPE` with the path to user's scope.
+- `TRIGGER` with the name of the event.
+- `USERNAME` with the user's username.
+- `DESTINATION` with the absolute path to the destination. Only used for **copy** and **rename.**
 
 At this moment, you can edit the commands via the command line interface, using the following commands \(please check the flag `--help` to know more about them\):
 
@@ -38,16 +38,16 @@ Within File Browser you can toggle the shell (`< >` icon at the top right) and t
 
 By default no commands are available as the command list is empty. To enable commands these need to either be done on a per-user basis (including for the Admin user).
 
-You can do this by adding them in Settings > User Management > (edit user) > Commands or to *apply to all new users created from that point forward* they can be set in Settings > Global Settings
+You can do this by adding them in Settings > User Management > (edit user) > Commands or to _apply to all new users created from that point forward_ they can be set in Settings > Global Settings
 
 > [!NOTE]
-> 
+>
 > If using a proxy manager then remember to enable websockets support for the File Browser proxy
 
 > [!NOTE]
-> 
-> If using Docker and you want to add a new command that is not in the base image then you will need to build a custom Docker image using `ghcr.io/dnsgeek/filebrowser` as a base image.  For example to add 7z:
-> 
+>
+> If using Docker and you want to add a new command that is not in the base image then you will need to build a custom Docker image using `ghcr.io/dnsgeek/filebrowser` as a base image. For example to add 7z:
+>
 > ```docker
 > FROM ghcr.io/dnsgeek/filebrowser
 > RUN sudo apt install p7zip-full

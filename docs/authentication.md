@@ -37,7 +37,7 @@ filebrowser config set --auth.method=proxy --auth.header=X-My-Header
 Where `X-My-Header` is the HTTP header provided by your proxy with the username.
 
 > [!WARNING]
-> 
+>
 > File Browser will blindly trust the provided header. If the proxy can be bypassed, an attacker could simply attach the header and get admin access. Please ensure that File Browser is not accessible from untrusted networks, and that the proxy is correctly configured to strip/overwrite the header from client requests.
 
 ## Hook Authentication
@@ -114,11 +114,11 @@ FileBrowser reads these lines and applies the corresponding authentication actio
 
 The hook must output one of the following actions:
 
-| Key    | Description |
-|--------|------------ |
-| hook.action=auth | Authenticates the user. FileBrowser will create or update the user if needed. |
-| hook.action=block | Rejects authentication. The login attempt fails. |
-| hook.action=pass | Delegates authentication to FileBrowser’s internal password validation. |
+| Key               | Description                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| hook.action=auth  | Authenticates the user. FileBrowser will create or update the user if needed. |
+| hook.action=block | Rejects authentication. The login attempt fails.                              |
+| hook.action=pass  | Delegates authentication to FileBrowser’s internal password validation.       |
 
 For most custom authentication flows, auth or block are used.
 
@@ -133,6 +133,7 @@ hook.action=auth
 When `hook.action=auth` is returned, the hook may also define additional user attributes. These fields override FileBrowser defaults and allow full customization of the authenticated user.
 
 1. Permissions
+
 ```
 user.perm.admin=true
 user.perm.execute=true
@@ -143,9 +144,11 @@ user.perm.delete=true
 user.perm.share=true
 user.perm.download=true
 ```
+
 > Setting user.perm.admin=true automatically enables all permissions.
 
 2. User Interface and Behavior
+
 ```
 user.locale=es
 user.viewMode=list
@@ -154,6 +157,7 @@ user.hideDotfiles=false
 ```
 
 3. User Scope
+
 ```
 user.scope=/
 ```

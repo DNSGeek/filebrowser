@@ -6,8 +6,8 @@ This project is archived on 2026-09-01. Pull requests are not accepted and no fu
 
 The backend side of the application is written in [Go](https://golang.org/), while the frontend (located on a subdirectory of the same name) is written in [Vue.js](https://vuejs.org/). Due to the tight coupling required by some features, basic knowledge of both Go and Vue.js is recommended.
 
-* Learn Go: [https://github.com/golang/go/wiki/Learn](https://github.com/golang/go/wiki/Learn)
-* Learn Vue.js: [https://vuejs.org/guide/introduction.html](https://vuejs.org/guide/introduction.html)
+- Learn Go: [https://github.com/golang/go/wiki/Learn](https://github.com/golang/go/wiki/Learn)
+- Learn Vue.js: [https://vuejs.org/guide/introduction.html](https://vuejs.org/guide/introduction.html)
 
 We encourage you to use git to manage your fork. To clone the main repository, just run:
 
@@ -112,4 +112,3 @@ After implementing the interface you should:
 3. Add it to the [`authBackend.Get`](https://github.com/filebrowser/filebrowser/blob/master/storage/bolt/auth.go).
 
 If you need to add more flags, please update the function `addConfigFlags`.
-

@@ -21,7 +21,7 @@ filebrowser config set --branding.name "My Name" \
   --branding.disableExternal
 ```
 
-> [!NOTE] 
+> [!NOTE]
 >
 > If you are using Docker, you need to mount a volume with the `branding` directory in order for it to be accessible from within the container.
 
@@ -38,7 +38,7 @@ img/
     (...)
 ```
 
-Note that there are different versions of the same favicon in multiple sizes. To replace all of them, you need to add versions for all of them. You can use the [Real Favicon Generator](https://realfavicongenerator.net/) to generate these for you from your base image. 
+Note that there are different versions of the same favicon in multiple sizes. To replace all of them, you need to add versions for all of them. You can use the [Real Favicon Generator](https://realfavicongenerator.net/) to generate these for you from your base image.
 
 > [!NOTE]
 >

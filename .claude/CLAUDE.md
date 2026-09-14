@@ -43,7 +43,7 @@ Read the actual source **at HEAD** and reach one verdict per advisory:
 
 Common traps — check each before accepting a report:
 
-- **"Incomplete fix of a prior advisory."** Read the original fix commit and confirm the *specific*
+- **"Incomplete fix of a prior advisory."** Read the original fix commit and confirm the _specific_
   sibling code path is actually still unguarded — a prior fix may already cover a related path.
 - **Wrong project.** Confirm the referenced files, symbols, and endpoints exist in this repo; reports
   sometimes describe a fork. If the cited code isn't here, close as not applicable.
@@ -104,16 +104,16 @@ Reporter reports arrive in whatever shape the reporter used. Before drafting, re
 accurate**, rather than paraphrasing it. Drop the greeting, the offer to help, and any claim the
 verification in step 2 disproved. Keep sections in this order and omit the ones that don't apply:
 
-| Section | Contents |
-| --- | --- |
-| `## Summary` | What the defect is, in two or three sentences. Note the version it was reported against and the range it was verified over. |
-| `## Details` | Root cause, naming `file.go`, the function, and a short quote of the **pre-fix** code. |
-| `## PoC` | The reporter's reproduction steps and observed result, trimmed to the essentials. |
-| `## Impact` | Who can exploit it (privilege level, preconditions) and what they get. |
-| `## Patches` | Fixed version plus a link to the fix commit, and one sentence on what the fix does. Mention it if the reporter re-tested and confirmed. |
-| `## Workarounds` | Real mitigations, or `None. Upgrade to vX.Y.Z.` |
+| Section           | Contents                                                                                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `## Summary`      | What the defect is, in two or three sentences. Note the version it was reported against and the range it was verified over.                                    |
+| `## Details`      | Root cause, naming `file.go`, the function, and a short quote of the **pre-fix** code.                                                                         |
+| `## PoC`          | The reporter's reproduction steps and observed result, trimmed to the essentials.                                                                              |
+| `## Impact`       | Who can exploit it (privilege level, preconditions) and what they get.                                                                                         |
+| `## Patches`      | Fixed version plus a link to the fix commit, and one sentence on what the fix does. Mention it if the reporter re-tested and confirmed.                        |
+| `## Workarounds`  | Real mitigations, or `None. Upgrade to vX.Y.Z.`                                                                                                                |
 | `## Out of scope` | Anything in the original report deliberately **not** treated as a vulnerability, with the reasoning. Needed whenever the advisory is narrower than the report. |
-| `## References` | Fix and regression-test commit links. |
+| `## References`   | Fix and regression-test commit links.                                                                                                                          |
 
 Use `##` headings (matching the published advisories) and keep the body in the maintainer's voice —
 first person ("I reproduced…") belongs only inside quoted PoC steps.
