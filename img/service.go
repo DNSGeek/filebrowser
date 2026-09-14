@@ -9,7 +9,7 @@ import (
 	"image"
 	"io"
 
-	"github.com/disintegration/imaging"
+	"github.com/boxes-ltd/imaging"
 	"github.com/dsoprea/go-exif/v3"
 	"github.com/marusama/semaphore/v2"
 
