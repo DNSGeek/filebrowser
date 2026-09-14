@@ -221,12 +221,12 @@ var resourcePutHandler = withUser(func(w http.ResponseWriter, r *http.Request, d
 
 func resourcePatchHandler(fileCache FileCache) handleFunc {
 	return withUser(func(_ http.ResponseWriter, r *http.Request, d *data) (int, error) {
-		src := requestPath(r)
-		dst := r.URL.Query().Get("destination")
 		action := r.URL.Query().Get("action")
-		dst, err := url.QueryUnescape(dst)
-		dst = slashClean(dst)
-		src = slashClean(src)
+		// Keep the unescaped destination in its own variable: dst is captured
+		// by the hook closure below and must only ever hold the cleaned path.
+		rawDst, err := url.QueryUnescape(r.URL.Query().Get("destination"))
+		dst := slashClean(rawDst)
+		src := slashClean(requestPath(r))
 		if !d.Check(src) || !d.Check(dst) {
 			return http.StatusForbidden, nil
 		}
