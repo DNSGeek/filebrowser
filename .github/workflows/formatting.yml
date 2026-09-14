@@ -262,8 +262,17 @@ jobs:
         run: |
           git diff --quiet . || echo "changed=true" >> "$GITHUB_OUTPUT"
 
+      # Pull requests are checked out as a detached merge commit, which can't be
+      # pushed back. List what needs formatting instead; the push to the branch
+      # after merging commits it.
+      - name: Report formatting changes
+        if: steps.verify_diff.outputs.changed == 'true' && github.event_name == 'pull_request'
+        run: |
+          echo "::notice title=Formatting::These files will be auto-formatted after merge:"
+          git diff --stat .
+
       - name: Commit and push changes
-        if: steps.verify_diff.outputs.changed == 'true'
+        if: steps.verify_diff.outputs.changed == 'true' && github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
