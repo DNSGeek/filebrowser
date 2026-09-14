@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.63.24](https://github.com/DNSGeek/filebrowser/compare/v2.63.23...v2.63.24) (2026-09-14)
+
+### Bug Fixes
+
+* **deps:** replace disintegration/imaging with boxes-ltd/imaging ([1aec3d1](https://github.com/DNSGeek/filebrowser/commit/1aec3d1d4a0eb92d8ac2af1a8f035cb1cfcd4c20))
+* keep raw copy/move destination out of the hook closure ([42be926](https://github.com/DNSGeek/filebrowser/commit/42be92611c1dd0609d8787b1dbca1c435f0b3f23))
+* make security fixes visible to CodeQL and clear Dependabot failures ([7616415](https://github.com/DNSGeek/filebrowser/commit/7616415a26dc6f2cf785a223b664db191bbbda99))
 ## [2.63.23](https://github.com/filebrowser/filebrowser/compare/v2.63.22...v2.63.23) (2026-07-27)
 ## [2.63.22](https://github.com/filebrowser/filebrowser/compare/v2.63.21...v2.63.22) (2026-07-27)
 
