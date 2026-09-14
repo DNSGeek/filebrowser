@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/asticode/go-astisub v0.44.0
-	github.com/disintegration/imaging v1.6.2
+	github.com/boxes-ltd/imaging v1.7.5
 	github.com/dsoprea/go-exif/v3 v3.0.1
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/golang-jwt/jwt/v5 v5.3.1
