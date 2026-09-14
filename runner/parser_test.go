@@ -42,12 +42,16 @@ func TestParseUserCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			command, ok, err := ParseUserCommand(tt.settings, tt.raw, allowed)
+			program, args, ok, err := ParseUserCommand(tt.settings, tt.raw, allowed)
 			if !errors.Is(err, tt.wantErr) {
 				t.Fatalf("err = %v, want %v", err, tt.wantErr)
 			}
 			if ok != tt.wantAllowed {
 				t.Fatalf("allowed = %v, want %v", ok, tt.wantAllowed)
+			}
+			var command []string
+			if ok {
+				command = append([]string{program}, args...)
 			}
 			if !slices.Equal(command, tt.wantCommand) {
 				t.Fatalf("command = %q, want %q", command, tt.wantCommand)

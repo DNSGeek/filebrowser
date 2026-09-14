@@ -2,6 +2,7 @@ package runner
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/filebrowser/filebrowser/v2/settings"
@@ -40,33 +41,38 @@ func ParseCommand(s *settings.Settings, raw string) (command []string, name stri
 }
 
 // ParseUserCommand parses a command issued by a user through the command
-// runner and checks it against the user's allowed commands.
+// runner, checks it against the user's allowed commands and returns the
+// program to execute and its arguments.
 //
 // Only the command name is checked against allowed, so when commands run
 // through a shell the rest of the line must not be able to start another
 // command (e.g. "ls; rm -rf ~" or "ls $(rm -rf ~)"). Such lines are rejected
-// with ErrShellMetachars. When no shell is used, the executable in the returned
-// command is taken from allowed rather than from raw.
-func ParseUserCommand(s *settings.Settings, raw string, allowed []string) (command []string, allowedName bool, err error) {
+// with ErrShellMetachars.
+//
+// The returned program never comes from raw: it is the configured shell, or
+// the matching entry of allowed when no shell is used.
+func ParseUserCommand(s *settings.Settings, raw string, allowed []string) (program string, args []string, ok bool, err error) {
 	if usesShell(s) && strings.ContainsAny(raw, shellMetachars) {
-		return nil, false, ErrShellMetachars
+		return "", nil, false, ErrShellMetachars
 	}
 
-	command, name, err := ParseCommand(s, raw)
+	name, parsedArgs, err := SplitCommandAndArgs(raw)
 	if err != nil {
-		return nil, false, err
+		return "", nil, false, err
 	}
 
-	for _, a := range allowed {
-		if a == name {
-			if !usesShell(s) {
-				command[0] = a
-			}
-			return command, true, nil
-		}
+	i := slices.Index(allowed, name)
+	if i < 0 {
+		return "", nil, false, nil
 	}
 
-	return nil, false, nil
+	if usesShell(s) {
+		args = append(args, s.Shell[1:]...)
+		args = append(args, raw)
+		return s.Shell[0], args, true, nil
+	}
+
+	return allowed[i], parsedArgs, true, nil
 }
 
 func usesShell(s *settings.Settings) bool {

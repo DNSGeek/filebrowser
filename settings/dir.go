@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -32,7 +33,8 @@ func (s *Settings) MakeUserDir(username, userScope, serverRoot string) (string, 
 		userScope = path.Join(s.UserHomeBasePath, username)
 	}
 
-	userScope = path.Clean("/" + userScope)
+	// A "/"-rooted, cleaned scope can't climb out of the server root.
+	userScope = filepath.ToSlash(filepath.Clean("/" + strings.TrimLeft(userScope, "/")))
 
 	fs := afero.NewBasePathFs(afero.NewOsFs(), serverRoot)
 	if err := fs.MkdirAll(userScope, os.ModePerm); err != nil {

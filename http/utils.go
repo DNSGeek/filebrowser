@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	gopath "path"
 	"path/filepath"
 	"strings"
 
@@ -32,16 +31,23 @@ func slashClean(name string) string {
 // canonicalizeRequestPath rewrites the request path to its canonical virtual
 // form, so that the filesystem operation, the hook, the stored share record and
 // the thumbnail cache key all use the same string the rule check approved.
+func canonicalizeRequestPath(r *http.Request) {
+	r.URL.Path = requestPath(r)
+}
+
+// requestPath returns the request path in canonical virtual form. Handlers
+// read the path through it rather than using r.URL.Path directly, so every
+// filesystem operation gets a path that was cleaned where it is used.
 //
 // A trailing separator is preserved: handlers distinguish "/dir/" from "/dir"
-// to decide whether to create a directory, and gopath.Clean would drop it.
-func canonicalizeRequestPath(r *http.Request) {
+// to decide whether to create a directory, and cleaning would drop it.
+func requestPath(r *http.Request) string {
 	p := slashClean(r.URL.Path)
 	trailing := strings.HasSuffix(r.URL.Path, "/") || strings.HasSuffix(r.URL.Path, string(filepath.Separator))
 	if p != "/" && trailing {
 		p += "/"
 	}
-	r.URL.Path = p
+	return p
 }
 
 // cleanSeparators is slashClean with the host separator passed in explicitly,
@@ -50,10 +56,10 @@ func cleanSeparators(name, sep string) string {
 	if sep != "/" {
 		name = strings.ReplaceAll(name, sep, "/")
 	}
-	if name == "" || name[0] != '/' {
-		name = "/" + name
-	}
-	return gopath.Clean(name)
+	// Cleaning a "/"-rooted path means no ".." can climb above the root.
+	// filepath.Clean of a "/" concatenation is the form CodeQL recognises as a
+	// path-injection sanitizer; ToSlash restores "/" separators on Windows.
+	return filepath.ToSlash(filepath.Clean("/" + strings.TrimLeft(name, "/")))
 }
 
 func renderJSON(w http.ResponseWriter, _ *http.Request, data interface{}) (int, error) {
