@@ -68,7 +68,7 @@ var commandsHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *d
 		return 0, nil
 	}
 
-	command, allowed, err := runner.ParseUserCommand(d.settings, raw, d.user.Commands)
+	program, args, allowed, err := runner.ParseUserCommand(d.settings, raw, d.user.Commands)
 	if err != nil {
 		if err := conn.WriteMessage(websocket.TextMessage, []byte(err.Error())); err != nil {
 			wsErr(conn, r, http.StatusInternalServerError, err)
@@ -84,8 +84,8 @@ var commandsHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *d
 		return 0, nil
 	}
 
-	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Dir = d.user.FullPath(r.URL.Path)
+	cmd := exec.Command(program, args...)
+	cmd.Dir = d.user.FullPath(requestPath(r))
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

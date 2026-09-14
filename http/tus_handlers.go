@@ -58,13 +58,13 @@ func keepUploadActive(cache UploadCache, filePath string) func() {
 
 func tusPostHandler(cache UploadCache) handleFunc {
 	return withUser(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
-		if !d.user.Perm.Create || !d.Check(r.URL.Path) {
+		if !d.user.Perm.Create || !d.Check(requestPath(r)) {
 			return http.StatusForbidden, nil
 		}
 
 		file, err := files.NewFileInfo(&files.FileOptions{
 			Fs:         d.user.Fs,
-			Path:       r.URL.Path,
+			Path:       requestPath(r),
 			Modify:     d.user.Perm.Modify,
 			Expand:     false,
 			ReadHeader: d.server.TypeDetectionByHeader,
@@ -72,7 +72,7 @@ func tusPostHandler(cache UploadCache) handleFunc {
 		})
 		switch {
 		case errors.Is(err, afero.ErrFileNotFound):
-			dirPath := filepath.Dir(r.URL.Path)
+			dirPath := filepath.Dir(requestPath(r))
 			if _, statErr := d.user.Fs.Stat(dirPath); os.IsNotExist(statErr) {
 				if mkdirErr := d.user.Fs.MkdirAll(dirPath, d.settings.DirMode); mkdirErr != nil {
 					return http.StatusInternalServerError, err
@@ -103,7 +103,7 @@ func tusPostHandler(cache UploadCache) handleFunc {
 			fileFlags |= os.O_TRUNC
 		}
 
-		openFile, err := d.user.Fs.OpenFile(r.URL.Path, fileFlags, d.settings.FileMode)
+		openFile, err := d.user.Fs.OpenFile(requestPath(r), fileFlags, d.settings.FileMode)
 		if err != nil {
 			return errToStatus(err), err
 		}
@@ -111,7 +111,7 @@ func tusPostHandler(cache UploadCache) handleFunc {
 
 		file, err = files.NewFileInfo(&files.FileOptions{
 			Fs:         d.user.Fs,
-			Path:       r.URL.Path,
+			Path:       requestPath(r),
 			Modify:     d.user.Perm.Modify,
 			Expand:     false,
 			ReadHeader: false,
@@ -130,7 +130,7 @@ func tusPostHandler(cache UploadCache) handleFunc {
 		// Enables the user to utilize the PATCH endpoint for uploading file data.
 		// The removal callback deletes an abandoned upload through the user's
 		// scoped filesystem, so eviction cannot follow a symlink out of scope.
-		uploadPath := r.URL.Path
+		uploadPath := requestPath(r)
 		cache.Register(file.RealPath(), uploadLength, func() error {
 			return d.user.Fs.Remove(uploadPath)
 		})
@@ -148,13 +148,13 @@ func tusPostHandler(cache UploadCache) handleFunc {
 func tusHeadHandler(cache UploadCache) handleFunc {
 	return withUser(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
 		w.Header().Set("Cache-Control", "no-store")
-		if !d.user.Perm.Create || !d.Check(r.URL.Path) {
+		if !d.user.Perm.Create || !d.Check(requestPath(r)) {
 			return http.StatusForbidden, nil
 		}
 
 		file, err := files.NewFileInfo(&files.FileOptions{
 			Fs:         d.user.Fs,
-			Path:       r.URL.Path,
+			Path:       requestPath(r),
 			Modify:     d.user.Perm.Modify,
 			Expand:     false,
 			ReadHeader: d.server.TypeDetectionByHeader,
@@ -190,7 +190,7 @@ func tusPatchHandler(cache UploadCache) handleFunc {
 }
 
 func tusPatchUpload(w http.ResponseWriter, r *http.Request, d *data, cache UploadCache) (int, error) {
-	if !d.user.Perm.Create || !d.Check(r.URL.Path) {
+	if !d.user.Perm.Create || !d.Check(requestPath(r)) {
 		return http.StatusForbidden, nil
 	}
 	if r.Header.Get("Content-Type") != "application/offset+octet-stream" {
@@ -204,7 +204,7 @@ func tusPatchUpload(w http.ResponseWriter, r *http.Request, d *data, cache Uploa
 
 	file, err := files.NewFileInfo(&files.FileOptions{
 		Fs:         d.user.Fs,
-		Path:       r.URL.Path,
+		Path:       requestPath(r),
 		Modify:     d.user.Perm.Modify,
 		Expand:     false,
 		ReadHeader: d.server.TypeDetectionByHeader,
@@ -242,7 +242,7 @@ func tusPatchUpload(w http.ResponseWriter, r *http.Request, d *data, cache Uploa
 		)
 	}
 
-	openFile, err := d.user.Fs.OpenFile(r.URL.Path, os.O_WRONLY|os.O_APPEND, d.settings.FileMode)
+	openFile, err := d.user.Fs.OpenFile(requestPath(r), os.O_WRONLY|os.O_APPEND, d.settings.FileMode)
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("could not open file: %w", err)
 	}
@@ -287,7 +287,7 @@ func tusPatchUpload(w http.ResponseWriter, r *http.Request, d *data, cache Uploa
 
 	if newOffset >= uploadLength {
 		cache.Complete(file.RealPath())
-		_ = d.RunHook(func() error { return nil }, "upload", r.URL.Path, "", d.user)
+		_ = d.RunHook(func() error { return nil }, "upload", requestPath(r), "", d.user)
 	}
 
 	return http.StatusNoContent, nil
@@ -295,13 +295,13 @@ func tusPatchUpload(w http.ResponseWriter, r *http.Request, d *data, cache Uploa
 
 func tusDeleteHandler(cache UploadCache) handleFunc {
 	return withUser(func(_ http.ResponseWriter, r *http.Request, d *data) (int, error) {
-		if r.URL.Path == "/" || !d.user.Perm.Delete {
+		if requestPath(r) == "/" || !d.user.Perm.Delete {
 			return http.StatusForbidden, nil
 		}
 
 		file, err := files.NewFileInfo(&files.FileOptions{
 			Fs:         d.user.Fs,
-			Path:       r.URL.Path,
+			Path:       requestPath(r),
 			Modify:     d.user.Perm.Modify,
 			Expand:     false,
 			ReadHeader: d.server.TypeDetectionByHeader,
@@ -316,7 +316,7 @@ func tusDeleteHandler(cache UploadCache) handleFunc {
 			return http.StatusNotFound, err
 		}
 
-		err = d.user.Fs.RemoveAll(r.URL.Path)
+		err = d.user.Fs.RemoveAll(requestPath(r))
 		if err != nil {
 			return errToStatus(err), err
 		}

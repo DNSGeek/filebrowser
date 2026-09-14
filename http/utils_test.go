@@ -1,6 +1,10 @@
 package fbhttp
 
-import "testing"
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
 // cleanSeparators takes the host separator explicitly so the Windows behaviour
 // can be asserted from any platform. See GHSA-fgm5-pw99-w2p7: on Windows a
@@ -39,6 +43,34 @@ func TestCleanSeparators(t *testing.T) {
 			t.Parallel()
 			if got := cleanSeparators(tc.in, tc.sep); got != tc.want {
 				t.Errorf("cleanSeparators(%q, %q) = %q; want %q", tc.in, tc.sep, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestRequestPath(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		in   string
+		want string
+	}{
+		{"/a/b.txt", "/a/b.txt"},
+		{"/a/dir/", "/a/dir/"},
+		{"/", "/"},
+		{"", "/"},
+		{"/../../etc/passwd", "/etc/passwd"},
+		{"/a/../../b/", "/b/"},
+		{"a//b/./c", "/a/b/c"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.in, func(t *testing.T) {
+			t.Parallel()
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+			r.URL.Path = tc.in
+			if got := requestPath(r); got != tc.want {
+				t.Errorf("requestPath(%q) = %q; want %q", tc.in, got, tc.want)
 			}
 		})
 	}

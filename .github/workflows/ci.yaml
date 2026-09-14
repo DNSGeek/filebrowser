@@ -8,6 +8,11 @@ on:
       - "v*"
   pull_request:
 
+# Every job only needs to read the repository. The release job publishes with
+# its own GH_PAT secret, not GITHUB_TOKEN.
+permissions:
+  contents: read
+
 jobs:
   lint-frontend:
     name: Lint Frontend
