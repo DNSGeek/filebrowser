@@ -28,7 +28,7 @@ tasks:
     internal: true
     prompt: Do you wish to proceed?
     cmds:
-      - pnpm dlx commit-and-tag-version -s
+      - pnpm dlx commit-and-tag-version
 
   release:dry-run:
     internal: true
