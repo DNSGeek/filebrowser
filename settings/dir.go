@@ -26,13 +26,13 @@ func (s *Settings) MakeUserDir(username, userScope, serverRoot string) (string, 
 	if userScope == "" && s.CreateUserDir {
 		username = cleanUsername(username)
 		if username == "" || username == "-" || username == "." {
-			log.Printf("create user: invalid user for home dir creation: [%s]", username)
+			log.Print("create user: invalid user for home dir creation")
 			return "", errors.New("invalid user for home dir creation")
 		}
 		userScope = path.Join(s.UserHomeBasePath, username)
 	}
 
-	userScope = path.Join("/", userScope)
+	userScope = path.Clean("/" + userScope)
 
 	fs := afero.NewBasePathFs(afero.NewOsFs(), serverRoot)
 	if err := fs.MkdirAll(userScope, os.ModePerm); err != nil {
