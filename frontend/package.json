@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@chenfengyuan/vue-number-input": "^2.0.1",
-    "@vueuse/core": "^14.0.0",
+    "@vueuse/core": "^15.0.0",
     "@vueuse/integrations": "^14.0.0",
     "ace-builds": "^1.43.2",
     "csv-parse": "^7.0.2",
