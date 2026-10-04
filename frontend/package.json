@@ -68,7 +68,7 @@
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "terser": "^5.51.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.3.1",
     "vite-plugin-compression2": "^2.3.1",
     "vitest": "^5.0.3",
