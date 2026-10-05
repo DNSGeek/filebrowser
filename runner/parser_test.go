@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/filebrowser/filebrowser/v2/settings"
+	"github.com/DNSGeek/filebrowser/v3/settings"
 )
 
 func TestParseUserCommand(t *testing.T) {

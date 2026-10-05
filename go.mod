@@ -1,4 +1,4 @@
-module github.com/filebrowser/filebrowser/v2
+module github.com/DNSGeek/filebrowser/v3
 
 go 1.26.0
 

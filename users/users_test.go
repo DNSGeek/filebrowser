@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/filebrowser/filebrowser/v2/files"
+	"github.com/DNSGeek/filebrowser/v3/files"
 )
 
 // TestUserCleanFs verifies that Clean builds the user filesystem according to the

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/filebrowser/filebrowser/v2/rules"
-	"github.com/filebrowser/filebrowser/v2/settings"
+	"github.com/DNSGeek/filebrowser/v3/rules"
+	"github.com/DNSGeek/filebrowser/v3/settings"
 )
 
 type settingsData struct {
