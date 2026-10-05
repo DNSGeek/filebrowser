@@ -149,3 +149,99 @@ func TestExpiredTokenNeedsProxyAssertion(t *testing.T) {
 		}
 	})
 }
+
+// Regression for non-revocable sessions: logout, renewal and password changes
+// used to leave every previously issued token valid until it expired.
+func TestSessionTokenRevocation(t *testing.T) {
+	key := []byte("test-signing-key")
+	perm := users.Permissions{Download: true}
+	st := scopedUserStorage(t, t.TempDir(), perm, key)
+	server := &settings.Server{}
+	expiry := time.Hour
+
+	login := func() string {
+		user, err := st.Users.Get("", false, uint(1))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rec := httptest.NewRecorder()
+		handle(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
+			return printToken(w, r, d, user, expiry)
+		}, "", st, server).ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/", http.NoBody))
+		return rec.Body.String()
+	}
+
+	call := func(h handleFunc, token string) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodPost, "/", http.NoBody)
+		req.Header.Set("X-Auth", token)
+		rec := httptest.NewRecorder()
+		handle(h, "", st, server).ServeHTTP(rec, req)
+		return rec
+	}
+
+	protected := withUser(func(_ http.ResponseWriter, _ *http.Request, _ *data) (int, error) { return 0, nil })
+
+	t.Run("logout revokes the token", func(t *testing.T) {
+		tok := login()
+		if rec := call(protected, tok); rec.Code != http.StatusOK {
+			t.Fatalf("fresh token = %d; want 200", rec.Code)
+		}
+		if rec := call(logoutHandler(expiry), tok); rec.Code != http.StatusOK {
+			t.Fatalf("logout = %d; want 200", rec.Code)
+		}
+		if rec := call(protected, tok); rec.Code != http.StatusUnauthorized {
+			t.Errorf("VULNERABLE: token after logout = %d; want 401", rec.Code)
+		}
+	})
+
+	t.Run("a token can be renewed only once", func(t *testing.T) {
+		tok := login()
+		first := call(renewHandler(expiry), tok)
+		if first.Code != http.StatusOK {
+			t.Fatalf("first renew = %d; want 200", first.Code)
+		}
+		if rec := call(renewHandler(expiry), tok); rec.Code != http.StatusUnauthorized {
+			t.Errorf("VULNERABLE: second renew of the same token = %d; want 401", rec.Code)
+		}
+		if rec := call(protected, tok); rec.Code != http.StatusUnauthorized {
+			t.Errorf("VULNERABLE: renewed-away token = %d; want 401", rec.Code)
+		}
+		if rec := call(protected, first.Body.String()); rec.Code != http.StatusOK {
+			t.Errorf("renewed token = %d; want 200", rec.Code)
+		}
+	})
+
+	t.Run("a password change revokes older tokens", func(t *testing.T) {
+		old := login()
+		user, err := st.Users.Get("", false, uint(1))
+		if err != nil {
+			t.Fatal(err)
+		}
+		user.Password = "new-hash"
+		if err := st.Users.Update(user, "Password"); err != nil {
+			t.Fatal(err)
+		}
+		if rec := call(protected, old); rec.Code != http.StatusUnauthorized {
+			t.Errorf("VULNERABLE: token from before the password change = %d; want 401", rec.Code)
+		}
+		if rec := call(protected, login()); rec.Code != http.StatusOK {
+			t.Errorf("token issued after the password change = %d; want 200", rec.Code)
+		}
+
+		// An update that keeps the password, even from a stale copy, must not
+		// revoke or resurrect anything.
+		stale := *user
+		stale.TokenVersion = 0
+		stale.ViewMode = users.MosaicViewMode
+		cur := login()
+		if err := st.Users.Update(&stale); err != nil {
+			t.Fatal(err)
+		}
+		if rec := call(protected, cur); rec.Code != http.StatusOK {
+			t.Errorf("token after an unrelated full update = %d; want 200", rec.Code)
+		}
+		if rec := call(protected, old); rec.Code != http.StatusUnauthorized {
+			t.Errorf("VULNERABLE: stale update resurrected an old token = %d; want 401", rec.Code)
+		}
+	})
+}

@@ -36,6 +36,11 @@ type User struct {
 	HideDotfiles          bool          `json:"hideDotfiles"`
 	DateFormat            bool          `json:"dateFormat"`
 	AceEditorTheme        string        `json:"aceEditorTheme"`
+
+	// TokenVersion is embedded in every session token and bumped whenever the
+	// password changes, which invalidates all tokens issued before. It is only
+	// ever set by Storage.Update.
+	TokenVersion uint `json:"tokenVersion"`
 }
 
 // GetRules implements rules.Provider.

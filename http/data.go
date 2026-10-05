@@ -23,6 +23,7 @@ type data struct {
 	server   *settings.Server
 	store    *storage.Storage
 	user     *users.User
+	token    *authToken
 	raw      interface{}
 
 	// checkerPrefix is prepended to every path before evaluating rules. It is

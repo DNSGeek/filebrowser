@@ -1,6 +1,8 @@
 package fbhttp
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"log"
@@ -41,6 +43,9 @@ type userInfo struct {
 
 type authToken struct {
 	User userInfo `json:"user"`
+	// TokenVersion must match users.User.TokenVersion, otherwise the token
+	// predates a password change and is rejected.
+	TokenVersion uint `json:"tv,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -126,6 +131,18 @@ func withUser(fn handleFunc) handleFunc {
 			return http.StatusUnauthorized, nil
 		}
 
+		// Tokens issued before revocation was introduced carry no ID and can
+		// only expire; every newer one is checked against the revocation list.
+		if tk.ID != "" {
+			revoked, revErr := d.store.Tokens.IsRevoked(tk.ID)
+			if revErr != nil {
+				return http.StatusInternalServerError, revErr
+			}
+			if revoked {
+				return http.StatusUnauthorized, nil
+			}
+		}
+
 		expiresSoon := tk.ExpiresAt != nil && time.Until(tk.ExpiresAt.Time) < time.Hour
 		updated := tk.IssuedAt != nil && tk.IssuedAt.Unix() < d.store.Users.LastUpdate(tk.User.ID)
 
@@ -137,6 +154,12 @@ func withUser(fn handleFunc) handleFunc {
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
+
+		if tk.TokenVersion != d.user.TokenVersion {
+			return http.StatusUnauthorized, nil
+		}
+
+		d.token = &tk
 
 		canonicalizeRequestPath(r)
 		return fn(w, r, d)
@@ -244,13 +267,69 @@ var signupHandler = func(w http.ResponseWriter, r *http.Request, d *data) (int, 
 
 func renewHandler(tokenExpireTime time.Duration) handleFunc {
 	return withUser(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
+		// A token may be exchanged for a new one only once, so that a copy of it
+		// cannot keep a session alive after the legitimate client has moved on.
+		if status, err := revokeToken(d, tokenExpireTime); status != 0 || err != nil {
+			return status, err
+		}
+
 		w.Header().Set("X-Renew-Token", "false")
 		return printToken(w, r, d, d.user, tokenExpireTime)
 	})
 }
 
+func logoutHandler(tokenExpireTime time.Duration) handleFunc {
+	return withUser(func(w http.ResponseWriter, _ *http.Request, d *data) (int, error) {
+		if status, err := revokeToken(d, tokenExpireTime); status != 0 || err != nil {
+			return status, err
+		}
+
+		http.SetCookie(w, &http.Cookie{Name: "auth", Value: "", Path: "/", MaxAge: -1, SameSite: http.SameSiteStrictMode})
+		return http.StatusOK, nil
+	})
+}
+
+// revokeToken revokes the token the request was authenticated with. It answers
+// 401 if the token had been revoked in the meantime, which is what makes
+// concurrent attempts to redeem one token race to a single winner.
+func revokeToken(d *data, tokenExpireTime time.Duration) (int, error) {
+	if d.token == nil || d.token.ID == "" {
+		return 0, nil
+	}
+
+	// An expired token that the proxy still vouches for must stay revoked for
+	// longer than its own expiry, or the record would be pruned right away.
+	expires := time.Now().Add(tokenExpireTime)
+	if d.token.ExpiresAt != nil && d.token.ExpiresAt.After(expires) {
+		expires = d.token.ExpiresAt.Time
+	}
+
+	revoked, err := d.store.Tokens.Revoke(d.token.ID, expires)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if !revoked {
+		return http.StatusUnauthorized, nil
+	}
+	return 0, nil
+}
+
+func newTokenID() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
 func printToken(w http.ResponseWriter, _ *http.Request, d *data, user *users.User, tokenExpirationTime time.Duration) (int, error) {
+	id, err := newTokenID()
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
 	claims := &authToken{
+		TokenVersion: user.TokenVersion,
 		User: userInfo{
 			ID:                    user.ID,
 			Locale:                user.Locale,
@@ -269,6 +348,7 @@ func printToken(w http.ResponseWriter, _ *http.Request, d *data, user *users.Use
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExpirationTime)),
 			Issuer:    "File Browser",
+			ID:        id,
 		},
 	}
 

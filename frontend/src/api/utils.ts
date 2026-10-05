@@ -25,15 +25,29 @@ export async function fetchURL(
   opts.headers = opts.headers || {};
 
   const { headers, ...rest } = opts;
-  let res;
-  try {
-    res = await fetch(`${baseURL}${url}`, {
+  const doFetch = () =>
+    fetch(`${baseURL}${url}`, {
       headers: {
         "X-Auth": authStore.jwt,
         ...headers,
       },
       ...rest,
     });
+
+  let res;
+  const sentJwt = authStore.jwt;
+  try {
+    res = await doFetch();
+    // A renewal that completed while this request was in flight revoked the
+    // token it was sent with, so try again with the new one.
+    if (
+      auth &&
+      res.status === 401 &&
+      authStore.jwt &&
+      authStore.jwt !== sentJwt
+    ) {
+      res = await doFetch();
+    }
   } catch (e) {
     // Check if the error is an intentional cancellation
     if (e instanceof Error && e.name === "AbortError") {

@@ -75,7 +75,25 @@ export async function login(
   }
 }
 
-export async function renew(jwt: string) {
+// Renewing consumes the token it is given, so concurrent renewals of the same
+// token must share one request instead of each redeeming it.
+let renewing: { jwt: string; promise: Promise<void> } | null = null;
+
+export function renew(jwt: string): Promise<void> {
+  if (renewing && renewing.jwt === jwt) {
+    return renewing.promise;
+  }
+
+  const promise = doRenew(jwt).finally(() => {
+    if (renewing?.promise === promise) {
+      renewing = null;
+    }
+  });
+  renewing = { jwt, promise };
+  return promise;
+}
+
+async function doRenew(jwt: string) {
   const res = await fetch(`${baseURL}/api/renew`, {
     method: "POST",
     headers: {
@@ -116,9 +134,19 @@ export async function signup(username: string, password: string) {
 }
 
 export function logout(reason?: string) {
+  // Revoke the session on the server, best effort: the client is signed out
+  // either way.
+  const authStore = useAuthStore();
+  if (authStore.jwt) {
+    fetch(`${baseURL}/api/logout`, {
+      method: "POST",
+      headers: { "X-Auth": authStore.jwt },
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+
   document.cookie = "auth=; Max-Age=0; Path=/; SameSite=Strict;";
 
-  const authStore = useAuthStore();
   authStore.clearUser();
 
   localStorage.setItem("jwt", "");

@@ -40,6 +40,24 @@ type Storage struct {
 	// provision serializes the scope-collision check and the save of newly
 	// provisioned users, which must not interleave. See SaveProvisioned.
 	provision sync.Mutex
+
+	// tokens serializes the read-modify-write of the token version.
+	tokens sync.Mutex
+}
+
+// changesPassword reports whether updating the given fields of user replaces
+// the password stored in stored. An empty fields list updates every field.
+func changesPassword(user, stored *User, fields []string) bool {
+	if len(fields) == 0 {
+		return user.Password != stored.Password
+	}
+
+	for _, f := range fields {
+		if f == "Password" {
+			return true
+		}
+	}
+	return false
 }
 
 // NewStorage creates a users storage from a backend.
@@ -92,6 +110,25 @@ func (s *Storage) Update(user *User, fields ...string) error {
 	err := user.Clean("", false, fields...)
 	if err != nil {
 		return err
+	}
+
+	// The token version is owned by the storage: whatever the caller carries in
+	// user (a stale copy, or a client-supplied value) must neither revoke nor
+	// resurrect sessions. A password change bumps it.
+	s.tokens.Lock()
+	defer s.tokens.Unlock()
+
+	stored, err := s.back.GetBy(user.ID)
+	if err != nil {
+		return err
+	}
+
+	user.TokenVersion = stored.TokenVersion
+	if changesPassword(user, stored, fields) {
+		user.TokenVersion++
+		if len(fields) != 0 {
+			fields = append(fields, "TokenVersion")
+		}
 	}
 
 	err = s.back.Update(user, fields...)

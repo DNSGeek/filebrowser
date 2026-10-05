@@ -110,6 +110,7 @@ import Languages from "@/components/settings/Languages.vue";
 import { computed, inject, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { authMethod, noAuth } from "@/utils/constants";
+import { logout } from "@/utils/auth";
 
 const layoutStore = useLayoutStore();
 const authStore = useAuthStore();
@@ -177,8 +178,9 @@ const updatePassword = async (event: Event) => {
       password: password.value,
     };
     await api.update(data, ["password"], currentPassword.value);
-    authStore.updateUser(data);
-    $showSuccess(t("settings.passwordUpdated"));
+    // Changing the password revokes every session, this one included.
+    logout("passwordChanged");
+    return;
   } catch (e: any) {
     $showError(e);
   } finally {
