@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [3.0.0](https://github.com/DNSGeek/filebrowser/compare/v2.63.26...v3.0.0) (2026-10-05)
 
+### ⚠ BREAKING CHANGES
+
+* the Go module path changed from `github.com/filebrowser/filebrowser/v2` to `github.com/DNSGeek/filebrowser/v3`. Code importing the old path, or installing it with `go install …/v2`, does not receive 3.x. This is a maintained fork of the unmaintained upstream project.
+
+### Bug Fixes
+
+* **auth:** session tokens are now revocable. Logout (`POST /api/logout`), renewal and password changes invalidate previously issued tokens, and a token can be renewed only once. Tokens issued before the upgrade carry no ID and simply expire.
+* **runner:** hook commands run through a shell no longer have the file name pasted into the script, which allowed command injection through uploaded file names.
+* **runner:** commands run from the web UI time out after 10 minutes, stop when the client disconnects, are limited to 8 at once, and no longer inherit the server's environment.
+
+### Build
+
+* **release:** `task release -- --release-as major` forwards its arguments to `commit-and-tag-version`.
+
 ## [2.63.26](https://github.com/DNSGeek/filebrowser/compare/v2.63.25...v2.63.26) (2026-10-04)
 
 ## [2.63.25](https://github.com/DNSGeek/filebrowser/compare/v2.63.24...v2.63.25) (2026-09-28)
