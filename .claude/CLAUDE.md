@@ -1,12 +1,12 @@
 # CLAUDE.md
 
-Guidance for Claude when working in this repository (File Browser, `filebrowser/filebrowser`).
+Guidance for Claude when working in this repository (File Browser, `DNSGeek/filebrowser`).
 
 ## Repo orientation
 
 - Go backend (`github.com/DNSGeek/filebrowser/v3`, ecosystem `go`) + Vue frontend under `frontend/`.
-- The project is in **maintenance-only mode** (see `SECURITY.md`). Prefer small, surgical, well-tested changes.
-- Version scheme: `v2.63.x`. Conventional-commit messages (`fix(scope): …`, `feat: …`, `chore: …`).
+- This is a maintained fork of the unmaintained upstream `filebrowser/filebrowser` (see `SECURITY.md`). Prefer small, surgical, well-tested changes.
+- Version scheme: `v3.x`. Conventional-commit messages (`fix(scope): …`, `feat: …`, `chore: …`).
 - Verify with `go build ./...`, `go vet ./...`, `go test ./...`. Reuse existing test harnesses (e.g. `signToken`, `scopedUserStorage`, `handle`, `customFSUser`, `mockUserStore`).
 
 ---
@@ -21,11 +21,11 @@ All advisory state lives on GitHub and is driven with the `gh` CLI. States are
 
 ```bash
 # List by state (also: published, draft, closed)
-gh api '/repos/filebrowser/filebrowser/security-advisories?state=triage&per_page=100' \
+gh api '/repos/DNSGeek/filebrowser/security-advisories?state=triage&per_page=100' \
   --jq '.[] | {ghsa_id, severity, summary, state}'
 
 # Full report for one advisory (read .summary and .description)
-gh api /repos/filebrowser/filebrowser/security-advisories/GHSA-xxxx-xxxx-xxxx \
+gh api /repos/DNSGeek/filebrowser/security-advisories/GHSA-xxxx-xxxx-xxxx \
   --jq '.summary, "---", .description'
 ```
 
@@ -82,7 +82,7 @@ field). Encode the real preconditions in the vector so the band is defensible:
   its parent). Bands: `0.1–3.9` low, `4.0–6.9` medium, `7.0–8.9` high, `9.0–10.0` critical.
 
 ```bash
-gh api -X PATCH /repos/filebrowser/filebrowser/security-advisories/GHSA-xxxx-xxxx-xxxx \
+gh api -X PATCH /repos/DNSGeek/filebrowser/security-advisories/GHSA-xxxx-xxxx-xxxx \
   -f cvss_vector_string='CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H' \
   --jq '{ghsa_id, severity, score: .cvss.score, vector: .cvss.vector_string}'
 ```

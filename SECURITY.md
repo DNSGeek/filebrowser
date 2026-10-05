@@ -2,29 +2,34 @@
 
 ## Supported Versions
 
-No version receives security fixes. The last planned release has already shipped and no further changes will be merged.
+Security fixes are released for the latest `3.x` version only.
 
 | Version | Supported |
 | ------- | --------- |
+| 3.x     | ✅        |
 | 2.x     | ❌        |
 | < 2.0   | ❌        |
 
+Version 3 is a maintained fork of the unmaintained upstream project
+(`filebrowser/filebrowser`, last release 2.x). Upstream advisories that apply to
+2.x are not tracked here unless the affected code is still present in 3.x.
+
 ## Before Reporting
 
-This project is being wound down. To avoid duplicates, first check the [existing advisories](https://github.com/filebrowser/filebrowser/security/advisories) and open issues, and confirm:
+Please check the [existing advisories](https://github.com/DNSGeek/filebrowser/security/advisories) and open issues first, and confirm:
 
-- **It concerns this project, not a fork.** Reports about code, features, or endpoints that don't exist here belong to the relevant fork.
+- **It concerns this fork's code at its latest release.** Reports about code, features, or endpoints that don't exist here belong to the relevant project.
 - **It isn't an already-known class** that remains unaddressed. Those are listed under [Security](README.md#security) in the README; reports covering them are likely to be closed as duplicates.
 
 ## Reporting a Vulnerability
 
-Until 2026-09-01, report privately via the [Security](https://github.com/filebrowser/filebrowser/security) page. After that date this repository is read-only and reports can no longer be submitted.
+Report privately via the [Security](https://github.com/DNSGeek/filebrowser/security) page.
 
 Please include, where possible:
 
-- The commit the issue was found at
+- The commit or version the issue was found at
 - A plaintext proof of concept (no binaries)
 - Steps to reproduce
 - Recommended remediation, if any
 
-No fix will ship for any report: the last planned release has already shipped and no further changes will be merged. Reports may still be published as advisories so that people running File Browser can assess their exposure.
+Confirmed issues are fixed in the next `3.x` release and then published as advisories.
