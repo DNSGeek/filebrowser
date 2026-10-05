@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.0](https://github.com/DNSGeek/filebrowser/compare/v2.63.26...v3.0.0) (2026-10-05)
+
 ## [2.63.26](https://github.com/DNSGeek/filebrowser/compare/v2.63.25...v2.63.26) (2026-10-04)
 
 ## [2.63.25](https://github.com/DNSGeek/filebrowser/compare/v2.63.24...v2.63.25) (2026-09-28)
