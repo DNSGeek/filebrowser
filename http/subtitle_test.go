@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/filebrowser/filebrowser/v2/files"
+	"github.com/DNSGeek/filebrowser/v3/files"
 )
 
 func TestNormalizeSRTLineBreaks(t *testing.T) {

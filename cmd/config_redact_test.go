@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/filebrowser/filebrowser/v2/auth"
+	"github.com/DNSGeek/filebrowser/v3/auth"
 )
 
 func TestRedactAutherMasksReCaptchaSecret(t *testing.T) {

@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/filebrowser/filebrowser/v2/diskcache"
-	"github.com/filebrowser/filebrowser/v2/rules"
-	"github.com/filebrowser/filebrowser/v2/settings"
-	"github.com/filebrowser/filebrowser/v2/storage"
-	"github.com/filebrowser/filebrowser/v2/users"
+	"github.com/DNSGeek/filebrowser/v3/diskcache"
+	"github.com/DNSGeek/filebrowser/v3/rules"
+	"github.com/DNSGeek/filebrowser/v3/settings"
+	"github.com/DNSGeek/filebrowser/v3/storage"
+	"github.com/DNSGeek/filebrowser/v3/users"
 )
 
 // denyRuleStorage builds a scoped storage whose global settings deny denyPath.

@@ -23,14 +23,14 @@ import (
 	"github.com/spf13/viper"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/filebrowser/filebrowser/v2/auth"
-	"github.com/filebrowser/filebrowser/v2/diskcache"
-	"github.com/filebrowser/filebrowser/v2/frontend"
-	fbhttp "github.com/filebrowser/filebrowser/v2/http"
-	"github.com/filebrowser/filebrowser/v2/img"
-	"github.com/filebrowser/filebrowser/v2/settings"
-	"github.com/filebrowser/filebrowser/v2/storage"
-	"github.com/filebrowser/filebrowser/v2/users"
+	"github.com/DNSGeek/filebrowser/v3/auth"
+	"github.com/DNSGeek/filebrowser/v3/diskcache"
+	"github.com/DNSGeek/filebrowser/v3/frontend"
+	fbhttp "github.com/DNSGeek/filebrowser/v3/http"
+	"github.com/DNSGeek/filebrowser/v3/img"
+	"github.com/DNSGeek/filebrowser/v3/settings"
+	"github.com/DNSGeek/filebrowser/v3/storage"
+	"github.com/DNSGeek/filebrowser/v3/users"
 )
 
 var (
@@ -191,11 +191,6 @@ user created with the credentials from options "username" and "password".`,
 			return err
 		}
 		setupLog(server.Log)
-
-		log.Println("NOTICE: File Browser is being wound down.")
-		log.Println("NOTICE: The project is archived on 2026-09-01, after which there will be no")
-		log.Println("NOTICE: further releases and no security fixes. Known unfixed issues are at")
-		log.Println("NOTICE: https://github.com/filebrowser/filebrowser/security/advisories")
 
 		root, err := filepath.Abs(server.Root)
 		if err != nil {

@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/filebrowser/filebrowser/v2/settings"
+	"github.com/DNSGeek/filebrowser/v3/settings"
 )
 
 // shellMetachars are the characters a shell (sh, bash, cmd.exe, PowerShell)

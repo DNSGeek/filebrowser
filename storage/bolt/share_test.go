@@ -7,7 +7,7 @@ import (
 
 	"github.com/asdine/storm/v3"
 
-	"github.com/filebrowser/filebrowser/v2/share"
+	"github.com/DNSGeek/filebrowser/v3/share"
 )
 
 func newTestShareBackend(t *testing.T) shareBackend {

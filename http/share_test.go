@@ -13,10 +13,10 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/filebrowser/filebrowser/v2/settings"
-	"github.com/filebrowser/filebrowser/v2/share"
-	"github.com/filebrowser/filebrowser/v2/storage/bolt"
-	"github.com/filebrowser/filebrowser/v2/users"
+	"github.com/DNSGeek/filebrowser/v3/settings"
+	"github.com/DNSGeek/filebrowser/v3/share"
+	"github.com/DNSGeek/filebrowser/v3/storage/bolt"
+	"github.com/DNSGeek/filebrowser/v3/users"
 )
 
 func TestAdminShareGetsHandlerMatchesOwnerScope(t *testing.T) {
