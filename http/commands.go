@@ -2,9 +2,11 @@ package fbhttp
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -16,7 +18,38 @@ import (
 
 const (
 	WSWriteDeadline = 10 * time.Second
+
+	// commandTimeout bounds how long a command run from the web UI may live.
+	commandTimeout = 10 * time.Minute
+
+	// maxRunningCommands bounds how many commands run from the web UI at once.
+	maxRunningCommands = 8
 )
+
+var runningCommands = make(chan struct{}, maxRunningCommands)
+
+// commandEnvKeys are the only variables a command run from the web UI inherits
+// from the server. The rest of the environment may hold secrets (credentials,
+// tokens, FB_* settings) that the people allowed to run commands must not read.
+var commandEnvKeys = []string{
+	"PATH", "HOME", "USER", "LOGNAME", "SHELL", "LANG", "LANGUAGE", "TZ", "TMPDIR", "TERM",
+	"SYSTEMROOT", "COMSPEC", "PATHEXT", "WINDIR", "TEMP", "TMP",
+}
+
+func commandEnv() []string {
+	var env []string
+	for _, k := range commandEnvKeys {
+		if v, ok := os.LookupEnv(k); ok {
+			env = append(env, k+"="+v)
+		}
+	}
+	for _, kv := range os.Environ() {
+		if strings.HasPrefix(kv, "LC_") {
+			env = append(env, kv)
+		}
+	}
+	return env
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -84,7 +117,32 @@ var commandsHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *d
 		return 0, nil
 	}
 
-	cmd := exec.Command(program, args...)
+	select {
+	case runningCommands <- struct{}{}:
+		defer func() { <-runningCommands }()
+	default:
+		if err := conn.WriteMessage(websocket.TextMessage, []byte("Too many commands are running.")); err != nil {
+			wsErr(conn, r, http.StatusInternalServerError, err)
+		}
+		return 0, nil
+	}
+
+	// The command ends with the timeout or as soon as the client goes away,
+	// instead of running on, unobserved, on the server.
+	ctx, cancel := context.WithTimeout(r.Context(), commandTimeout)
+	defer cancel()
+
+	go func() {
+		// The client sends nothing after the command; this read only returns
+		// when the connection closes.
+		_, _, _ = conn.ReadMessage()
+		cancel()
+	}()
+
+	cmd := exec.CommandContext(ctx, program, args...)
+	cmd.Env = commandEnv()
+	// Killing a shell leaves its children holding the output pipes open.
+	cmd.WaitDelay = 5 * time.Second
 	cmd.Dir = d.user.FullPath(requestPath(r))
 
 	stdout, err := cmd.StdoutPipe()

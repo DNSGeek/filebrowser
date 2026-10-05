@@ -81,12 +81,18 @@ func (r *Runner) exec(raw, evt, path, dst string, user *users.User) error {
 			return os.Getenv(key)
 		}
 	}
-	for i, arg := range command {
-		if i == 0 {
-			continue
-		}
+	// Without a shell the arguments are expanded here. With one, the script is
+	// left alone and the shell expands the variables from the environment set
+	// below: pasting values such as the file name into the script text would
+	// let them be parsed as shell syntax.
+	if !usesShell(r.Settings) {
+		for i, arg := range command {
+			if i == 0 {
+				continue
+			}
 
-		command[i] = os.Expand(arg, envMapping)
+			command[i] = os.Expand(arg, envMapping)
+		}
 	}
 
 	cmd := exec.Command(command[0], command[1:]...)
@@ -96,7 +102,6 @@ func (r *Runner) exec(raw, evt, path, dst string, user *users.User) error {
 	cmd.Env = append(cmd.Env, fmt.Sprintf("USERNAME=%s", user.Username))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("DESTINATION=%s", dst))
 
-	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
