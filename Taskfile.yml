@@ -28,12 +28,12 @@ tasks:
     internal: true
     prompt: Do you wish to proceed?
     cmds:
-      - pnpm dlx commit-and-tag-version
+      - pnpm dlx commit-and-tag-version {{.CLI_ARGS}}
 
   release:dry-run:
     internal: true
     cmds:
-      - pnpm dlx commit-and-tag-version --dry-run --skip
+      - pnpm dlx commit-and-tag-version --dry-run --skip {{.CLI_ARGS}}
 
   release:
     desc: Create a new release
