@@ -16,7 +16,7 @@ Published advisories are listed under [security advisories](https://github.com/D
 and reporting instructions are in [SECURITY.md](SECURITY.md). One known issue class
 remains only partly addressed:
 
-- **Command execution, runner, and hooks.** This feature is plagued with vulnerabilities across many published advisories, and would need a full rewrite to be made safe. It is disabled by default; if you re-enable it with `--disable-exec=false`, treat the ability to run commands as equivalent to shell access on the host. Background: [#5199](https://github.com/filebrowser/filebrowser/issues/5199). *Added some safety checks.*
+- **Command execution, runner, and hooks.** This feature is plagued with vulnerabilities across many published advisories, and would need a full rewrite to be made safe. It is disabled by default; if you re-enable it with `--disable-exec=false`, treat the ability to run commands as equivalent to shell access on the host. Background: [#5199](https://github.com/filebrowser/filebrowser/issues/5199). _Added some safety checks._
 
 Hardening guidance:
 
