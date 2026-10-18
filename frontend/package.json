@@ -39,7 +39,7 @@
     "qrcode.vue": "^3.11.0",
     "tus-js-client": "^4.3.1",
     "utif": "^3.1.0",
-    "video.js": "^8.24.1",
+    "video.js": "^8.24.2",
     "videojs-hotkeys": "^0.2.28",
     "videojs-mobile-ui": "^1.2.7",
     "vue": "^3.5.43",
