@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.2](https://github.com/DNSGeek/filebrowser/compare/v3.0.1...v3.0.2) (2026-10-25)
+
+### Bug Fixes
+
+* **frontend:** accept string EPUB CFI from vue-reader location updates ([d73084d](https://github.com/DNSGeek/filebrowser/commit/d73084dc24959b7e3b2a730f1112b8d662e16cfe))
+
 ## [3.0.1](https://github.com/DNSGeek/filebrowser/compare/v3.0.0...v3.0.1) (2026-10-18)
 
 ## [3.0.0](https://github.com/DNSGeek/filebrowser/compare/v2.63.26...v3.0.0) (2026-10-05)
