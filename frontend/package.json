@@ -29,6 +29,7 @@
     "filesize": "^11.0.28",
     "js-base64": "^3.9.4",
     "jwt-decode": "^4.0.0",
+    "katex": "^0.18.10",
     "lodash-es": "^4.17.21",
     "marked": "^18.1.1",
     "marked-katex-extension": "^5.1.13",
