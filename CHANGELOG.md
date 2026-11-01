@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.3](https://github.com/DNSGeek/filebrowser/compare/v3.0.2...v3.0.3) (2026-11-01)
+
+### Bug Fixes
+
+* **deps:** bump katex to 0.18.10 ([23aaaf5](https://github.com/DNSGeek/filebrowser/commit/23aaaf5789dc1ae0c4ac0671990be031d80c9a08))
+* **deps:** override minimatch to ^11.0.1 in /frontend ([d403f16](https://github.com/DNSGeek/filebrowser/commit/d403f16c2a7e6e9c5a5de3b3f8469bdd76e2b54c))
+
 ## [3.0.2](https://github.com/DNSGeek/filebrowser/compare/v3.0.1...v3.0.2) (2026-10-25)
 
 ### Bug Fixes
