@@ -13,7 +13,7 @@ filebrowser config cat [flags]
 ## Options
 
 ```
-  -h, --help   help for cat
+  -h, --help[=true|false]   help for cat
 ```
 
 ## Options inherited from parent commands

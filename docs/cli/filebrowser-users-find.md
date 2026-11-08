@@ -13,7 +13,7 @@ filebrowser users find <id|username> [flags]
 ## Options
 
 ```
-  -h, --help   help for find
+  -h, --help[=true|false]   help for find
 ```
 
 ## Options inherited from parent commands

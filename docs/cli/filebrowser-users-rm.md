@@ -13,7 +13,7 @@ filebrowser users rm <id|username> [flags]
 ## Options
 
 ```
-  -h, --help   help for rm
+  -h, --help[=true|false]   help for rm
 ```
 
 ## Options inherited from parent commands

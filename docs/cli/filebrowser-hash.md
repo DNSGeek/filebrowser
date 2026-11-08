@@ -13,7 +13,7 @@ filebrowser hash <password> [flags]
 ## Options
 
 ```
-  -h, --help   help for hash
+  -h, --help[=true|false]   help for hash
 ```
 
 ## Options inherited from parent commands

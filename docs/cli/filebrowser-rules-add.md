@@ -13,9 +13,9 @@ filebrowser rules add <path|expression> [flags]
 ## Options
 
 ```
-  -a, --allow   indicates this is an allow rule
-  -h, --help    help for add
-  -r, --regex   indicates this is a regex rule
+  -a, --allow[=true|false]   indicates this is an allow rule
+  -h, --help[=true|false]    help for add
+  -r, --regex[=true|false]   indicates this is a regex rule
 ```
 
 ## Options inherited from parent commands

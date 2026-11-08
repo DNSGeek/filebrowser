@@ -13,8 +13,8 @@ filebrowser cmds ls [flags]
 ## Options
 
 ```
-  -e, --event string   event name, without 'before' or 'after'
-  -h, --help           help for ls
+  -e, --event string        event name, without 'before' or 'after'
+  -h, --help[=true|false]   help for ls
 ```
 
 ## Options inherited from parent commands

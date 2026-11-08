@@ -21,8 +21,8 @@ filebrowser rules rm <index> [index_end] [flags]
 ## Options
 
 ```
-  -h, --help         help for rm
-      --index uint   index of rule to remove
+  -h, --help[=true|false]   help for rm
+      --index uint          index of rule to remove
 ```
 
 ## Options inherited from parent commands

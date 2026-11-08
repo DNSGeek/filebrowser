@@ -20,7 +20,7 @@ filebrowser config import <path> [flags]
 ## Options
 
 ```
-  -h, --help   help for import
+  -h, --help[=true|false]   help for import
 ```
 
 ## Options inherited from parent commands

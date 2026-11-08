@@ -16,9 +16,9 @@ filebrowser users import <path> [flags]
 ## Options
 
 ```
-  -h, --help        help for import
-      --overwrite   overwrite users with the same id/username combo
-      --replace     replace the entire user base
+  -h, --help[=true|false]        help for import
+      --overwrite[=true|false]   overwrite users with the same id/username combo
+      --replace[=true|false]     replace the entire user base
 ```
 
 ## Options inherited from parent commands

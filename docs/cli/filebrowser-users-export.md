@@ -14,7 +14,7 @@ filebrowser users export <path> [flags]
 ## Options
 
 ```
-  -h, --help   help for export
+  -h, --help[=true|false]   help for export
 ```
 
 ## Options inherited from parent commands

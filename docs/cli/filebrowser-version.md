@@ -9,7 +9,7 @@ filebrowser version [flags]
 ## Options
 
 ```
-  -h, --help   help for version
+  -h, --help[=true|false]   help for version
 ```
 
 ## Options inherited from parent commands

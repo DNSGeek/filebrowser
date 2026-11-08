@@ -9,7 +9,7 @@ Command runner management utility.
 ## Options
 
 ```
-  -h, --help   help for cmds
+  -h, --help[=true|false]   help for cmds
 ```
 
 ## Options inherited from parent commands

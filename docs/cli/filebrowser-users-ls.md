@@ -9,7 +9,7 @@ filebrowser users ls [flags]
 ## Options
 
 ```
-  -h, --help   help for ls
+  -h, --help[=true|false]   help for ls
 ```
 
 ## Options inherited from parent commands

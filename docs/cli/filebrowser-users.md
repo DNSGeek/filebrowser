@@ -9,7 +9,7 @@ Users management utility.
 ## Options
 
 ```
-  -h, --help   help for users
+  -h, --help[=true|false]   help for users
 ```
 
 ## Options inherited from parent commands
