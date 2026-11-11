@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0](https://github.com/DNSGeek/filebrowser/compare/v3.0.4...v4.0.0) (2026-11-11)
+
+### ⚠ BREAKING CHANGES
+
+* **runner:** command lists from earlier versions grant nothing until
+  actions with those names are defined with "filebrowser actions add".
+  Users can no longer pass options or arbitrary arguments, and commands are
+  never run through a shell.
+* **hooks:** hooks stored by earlier versions in the "commands"
+  setting are kept but no longer run; re-add them with "filebrowser cmds
+  add". Hooks no longer run through a shell, variables inside a longer
+  argument are not expanded, and other environment variables are not
+  expanded in hook arguments.
+
+### Features
+
+* **hooks:** define hooks from the command line only and run them without a shell ([2ddc0dd](https://github.com/DNSGeek/filebrowser/commit/2ddc0dd0f4f0f62cf4b2aad382038de4a5c7f57b))
+* **runner:** replace the command allowlist with operator-defined actions ([ce5a36a](https://github.com/DNSGeek/filebrowser/commit/ce5a36a873641d075ba8979ef6980a712177141c))
+
 ## [3.0.4](https://github.com/DNSGeek/filebrowser/compare/v3.0.3...v3.0.4) (2026-11-08)
 
 ## [3.0.3](https://github.com/DNSGeek/filebrowser/compare/v3.0.2...v3.0.3) (2026-11-01)
