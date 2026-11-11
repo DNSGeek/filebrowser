@@ -56,7 +56,8 @@ filebrowser [flags]
   -t, --cert string                                 tls certificate
   -c, --config string                               config file path
   -d, --database string                             database path (default "./filebrowser.db")
-      --disableExec[=true|false]                    disables Command Runner feature (default true)
+      --disableExec[=true|false]                    disables the interactive Command Runner feature (default true)
+      --disableHooks[=true|false]                   disables the event hooks defined with 'filebrowser cmds'
       --disableImageResolutionCalc[=true|false]     disables image resolution calculation by reading image files
       --disablePreviewResize[=true|false]           disable resize of image previews
       --disableThumbnails[=true|false]              disable image thumbnails
@@ -79,7 +80,8 @@ filebrowser [flags]
 
 ## See Also
 
-* [filebrowser cmds](filebrowser-cmds.md)	 - Command runner management utility
+* [filebrowser actions](filebrowser-actions.md)	 - Command runner actions management utility
+* [filebrowser cmds](filebrowser-cmds.md)	 - Event hooks management utility
 * [filebrowser completion](filebrowser-completion.md)	 - Generate the autocompletion script for the specified shell
 * [filebrowser config](filebrowser-config.md)	 - Configuration management utility
 * [filebrowser hash](filebrowser-hash.md)	 - Hashes a password

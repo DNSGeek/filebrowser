@@ -32,7 +32,8 @@ filebrowser config set [flags]
       --createUserDir[=true|false]                    generate user's home directory automatically
       --dateFormat[=true|false]                       use date format (true for absolute time, false for relative)
       --dirMode string                                mode bits that new directories are created with (default "0o750")
-      --disableExec[=true|false]                      disables Command Runner feature (default true)
+      --disableExec[=true|false]                      disables the interactive Command Runner feature (default true)
+      --disableHooks[=true|false]                     disables the event hooks defined with 'filebrowser cmds'
       --disableImageResolutionCalc[=true|false]       disables image resolution calculation by reading image files
       --disablePreviewResize[=true|false]             disable resize of image previews
       --disableThumbnails[=true|false]                disable image thumbnails
@@ -62,7 +63,6 @@ filebrowser config set [flags]
       --redirectAfterCopyMove[=true|false]            redirect to destination after copy/move
   -r, --root string                                   root to prepend to relative paths (default ".")
       --scope string                                  scope for users (default ".")
-      --shell string                                  shell command to which other commands should be appended
   -s, --signup[=true|false]                           allow users to signup
       --singleClick[=true|false]                      use single clicks only
       --socket string                                 socket to listen to (cannot be used with address, port, cert nor key flags)

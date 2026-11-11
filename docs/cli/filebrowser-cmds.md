@@ -1,10 +1,15 @@
 # filebrowser cmds
 
-Command runner management utility
+Event hooks management utility
 
 ## Synopsis
 
-Command runner management utility.
+Event hooks management utility.
+
+Hooks are commands that run before or after a file event (save, copy,
+rename, upload, delete). They can only be managed with this command, on
+the machine File Browser runs on, and are started directly, without a
+shell. See docs/command-execution.md.
 
 ## Options
 

@@ -33,5 +33,5 @@ filebrowser cmds rm <event> <index> [index_end] [flags]
 
 ## See Also
 
-* [filebrowser cmds](filebrowser-cmds.md)	 - Command runner management utility
+* [filebrowser cmds](filebrowser-cmds.md)	 - Event hooks management utility
 

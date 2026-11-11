@@ -26,5 +26,5 @@ filebrowser cmds ls [flags]
 
 ## See Also
 
-* [filebrowser cmds](filebrowser-cmds.md)	 - Command runner management utility
+* [filebrowser cmds](filebrowser-cmds.md)	 - Event hooks management utility
 
