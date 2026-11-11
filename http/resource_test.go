@@ -235,7 +235,7 @@ func TestResourcePostRunsUploadHooksForDirectories(t *testing.T) {
 	st := scopedUserStorage(t, userScope, perm, key)
 	if err := st.Settings.Save(&settings.Settings{
 		Key: key,
-		Commands: map[string][]string{
+		Hooks: map[string][]string{
 			"after_upload": {"filebrowser-hook-command-that-does-not-exist"},
 		},
 	}); err != nil {
@@ -245,7 +245,7 @@ func TestResourcePostRunsUploadHooksForDirectories(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodPost, "/created/", http.NoBody)
 	req.Header.Set("X-Auth", signToken(t, perm, key))
 	rec := httptest.NewRecorder()
-	handle(resourcePostHandler(diskcache.NewNoOp()), "", st, &settings.Server{EnableExec: true}).ServeHTTP(rec, req)
+	handle(resourcePostHandler(diskcache.NewNoOp()), "", st, &settings.Server{}).ServeHTTP(rec, req)
 
 	// A missing after_upload command makes the request fail only if the hook ran.
 	// It avoids a platform-specific helper executable while still exercising the

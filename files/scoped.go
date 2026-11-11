@@ -87,6 +87,30 @@ func (s *ScopedFs) RealPath(name string) (string, error) {
 	return s.base.RealPath(name)
 }
 
+// GuardedRealPath returns the on-disk path of name in a user filesystem, after
+// checking it the way every file operation is checked: it must not climb out
+// of the scope and, unless external symlinks are followed, must not resolve
+// outside it through a symbolic link. It is for callers that hand the path to
+// something other than the filesystem itself, such as an external program.
+func GuardedRealPath(fs afero.Fs, name string) (string, error) {
+	var s *ScopedFs
+	switch f := fs.(type) {
+	case *ScopedFs:
+		s = f
+	case *afero.BasePathFs:
+		s = &ScopedFs{base: f}
+	default:
+		return "", os.ErrPermission
+	}
+
+	if err := s.guard(name); err != nil {
+		return "", err
+	}
+	// The same path guard checked: FullBaseFsPath, unlike BasePathFs.RealPath,
+	// also applies the base of any filesystem this one is layered on.
+	return filepath.Clean(afero.FullBaseFsPath(s.base, name)), nil
+}
+
 // guard returns an error if name lexically climbs out of the scope or, unless
 // followExternal is set, if its on-disk target resolves outside the scope.
 func (s *ScopedFs) guard(name string) error {

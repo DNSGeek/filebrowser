@@ -61,7 +61,8 @@ func (s *Storage) Get() (*Settings, error) {
 	return set, nil
 }
 
-var defaultEvents = []string{
+// HookEvents are the file events a hook can run before or after.
+var HookEvents = []string{
 	"save",
 	"copy",
 	"rename",
@@ -91,21 +92,21 @@ func (s *Storage) Save(set *Settings) error {
 		set.Rules = []rules.Rule{}
 	}
 
-	if set.Shell == nil {
-		set.Shell = []string{}
+	if set.Actions == nil {
+		set.Actions = map[string]string{}
 	}
 
-	if set.Commands == nil {
-		set.Commands = map[string][]string{}
+	if set.Hooks == nil {
+		set.Hooks = map[string][]string{}
 	}
 
-	for _, event := range defaultEvents {
-		if _, ok := set.Commands["before_"+event]; !ok {
-			set.Commands["before_"+event] = []string{}
+	for _, event := range HookEvents {
+		if _, ok := set.Hooks["before_"+event]; !ok {
+			set.Hooks["before_"+event] = []string{}
 		}
 
-		if _, ok := set.Commands["after_"+event]; !ok {
-			set.Commands["after_"+event] = []string{}
+		if _, ok := set.Hooks["after_"+event]; !ok {
+			set.Hooks["after_"+event] = []string{}
 		}
 	}
 

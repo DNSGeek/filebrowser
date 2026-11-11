@@ -26,11 +26,12 @@ var cmdsLsCmd = &cobra.Command{
 		}
 
 		if evt == "" {
-			printEvents(s.Commands)
+			printEvents(s.Hooks)
+			printLegacyCommands(s)
 		} else {
 			show := map[string][]string{}
-			show["before_"+evt] = s.Commands["before_"+evt]
-			show["after_"+evt] = s.Commands["after_"+evt]
+			show["before_"+evt] = s.Hooks["before_"+evt]
+			show["after_"+evt] = s.Hooks["after_"+evt]
 			printEvents(show)
 		}
 

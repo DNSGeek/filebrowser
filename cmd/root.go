@@ -44,6 +44,7 @@ var (
 		"disable-thumbnails":               "disableThumbnails",
 		"disable-preview-resize":           "disablePreviewResize",
 		"disable-exec":                     "disableExec",
+		"disable-hooks":                    "disableHooks",
 		"disable-type-detection-by-header": "disableTypeDetectionByHeader",
 		"img-processors":                   "imageProcessors",
 		"cache-dir":                        "cacheDir",
@@ -109,7 +110,8 @@ func addServerFlags(flags *pflag.FlagSet) {
 	flags.String("tokenExpirationTime", "2h", "user session timeout")
 	flags.Bool("disableThumbnails", false, "disable image thumbnails")
 	flags.Bool("disablePreviewResize", false, "disable resize of image previews")
-	flags.Bool("disableExec", true, "disables Command Runner feature")
+	flags.Bool("disableExec", true, "disables the interactive Command Runner feature")
+	flags.Bool("disableHooks", false, "disables the event hooks defined with 'filebrowser cmds'")
 	flags.Bool("disableTypeDetectionByHeader", false, "disables type detection by reading file headers")
 	flags.Bool("disableImageResolutionCalc", false, "disables image resolution calculation by reading image files")
 	flags.Bool("followExternalSymlinks", false, "follow symlinks whose target is outside the user scope (unsafe)")
@@ -355,6 +357,10 @@ func getServerSettings(v *viper.Viper, st *storage.Storage) (*settings.Server, e
 		server.EnableExec = !v.GetBool("disableExec")
 	}
 
+	if v.IsSet("disableHooks") {
+		server.DisableHooks = v.GetBool("disableHooks")
+	}
+
 	if v.IsSet("followExternalSymlinks") {
 		server.FollowExternalSymlinks = v.GetBool("followExternalSymlinks")
 	}
@@ -370,9 +376,9 @@ func getServerSettings(v *viper.Viper, st *storage.Storage) (*settings.Server, e
 
 	if server.EnableExec {
 		log.Println("WARNING: Command Runner feature enabled!")
-		log.Println("WARNING: This feature has known security vulnerabilities and should not")
-		log.Println("WARNING: you fully understand the risks involved. For more information")
-		log.Println("WARNING: read https://github.com/filebrowser/filebrowser/issues/5199")
+		log.Println("WARNING: Users can run the actions defined with 'filebrowser actions' on the")
+		log.Println("WARNING: files in their scope. What those programs then do is not confined.")
+		log.Println("WARNING: Read docs/command-execution.md before defining an action.")
 	}
 
 	if server.FollowExternalSymlinks {
@@ -380,6 +386,12 @@ func getServerSettings(v *viper.Viper, st *storage.Storage) (*settings.Server, e
 		log.Println("WARNING: Symlinks pointing outside a user's scope will be followed,")
 		log.Println("WARNING: which can expose files outside that scope. Only enable this if")
 		log.Println("WARNING: you fully understand and trust the contents of every user scope.")
+	}
+
+	if set, err := st.Settings.Get(); err == nil && set.HasLegacyCommands() {
+		log.Println("WARNING: This database holds hooks that were defined when they could be edited")
+		log.Println("WARNING: from the web interface. They are no longer run. Review them with")
+		log.Println("WARNING: 'filebrowser cmds ls' and re-add the ones you want with 'filebrowser cmds add'.")
 	}
 
 	if set, err := st.Settings.Get(); err == nil && set.Signup {
@@ -448,9 +460,8 @@ func quickSetup(v *viper.Viper, s *storage.Storage) error {
 			ChunkSize:  settings.DefaultTusChunkSize,
 			RetryCount: settings.DefaultTusRetryCount,
 		},
-		Commands: nil,
-		Shell:    nil,
-		Rules:    nil,
+		Hooks: nil,
+		Rules: nil,
 	}
 
 	var err error
@@ -482,6 +493,7 @@ func quickSetup(v *viper.Viper, s *storage.Storage) error {
 		EnableThumbnails:       !v.GetBool("disableThumbnails"),
 		ResizePreview:          !v.GetBool("disablePreviewResize"),
 		EnableExec:             !v.GetBool("disableExec"),
+		DisableHooks:           v.GetBool("disableHooks"),
 		TypeDetectionByHeader:  !v.GetBool("disableTypeDetectionByHeader"),
 		ImageResolutionCal:     !v.GetBool("disableImageResolutionCalc"),
 		FollowExternalSymlinks: v.GetBool("followExternalSymlinks"),
