@@ -9,7 +9,6 @@ interface ISettings {
   rules: any[];
   branding: SettingsBranding;
   tus: SettingsTus;
-  shell: string[];
 }
 
 interface SettingsDefaults {

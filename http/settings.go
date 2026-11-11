@@ -9,8 +9,8 @@ import (
 )
 
 // settingsData is what an administrator can read and change over HTTP. Hooks
-// are deliberately absent: they run commands on the host and are managed only
-// from the command line.
+// and actions are deliberately absent: they decide what runs on the host and
+// are managed only from the command line.
 type settingsData struct {
 	Signup                bool                  `json:"signup"`
 	HideLoginButton       bool                  `json:"hideLoginButton"`
@@ -22,7 +22,6 @@ type settingsData struct {
 	Rules                 []rules.Rule          `json:"rules"`
 	Branding              settings.Branding     `json:"branding"`
 	Tus                   settings.Tus          `json:"tus"`
-	Shell                 []string              `json:"shell"`
 }
 
 var settingsGetHandler = withAdmin(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
@@ -37,7 +36,6 @@ var settingsGetHandler = withAdmin(func(w http.ResponseWriter, r *http.Request, 
 		Rules:                 d.settings.Rules,
 		Branding:              d.settings.Branding,
 		Tus:                   d.settings.Tus,
-		Shell:                 d.settings.Shell,
 	}
 
 	return renderJSON(w, r, data)
@@ -58,7 +56,6 @@ var settingsPutHandler = withAdmin(func(_ http.ResponseWriter, r *http.Request, 
 	d.settings.Rules = req.Rules
 	d.settings.Branding = req.Branding
 	d.settings.Tus = req.Tus
-	d.settings.Shell = req.Shell
 	d.settings.HideLoginButton = req.HideLoginButton
 
 	err = d.store.Settings.Save(d.settings)

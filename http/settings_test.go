@@ -12,16 +12,17 @@ import (
 	"github.com/DNSGeek/filebrowser/v3/users"
 )
 
-// Hooks run commands on the host, so an administrator of the web interface
-// must be able neither to read nor to change them: a stolen admin session
+// Hooks and actions decide what runs on the host, so an administrator of the
+// web interface must be able neither to read nor to change them: a stolen admin session
 // would otherwise be code execution on the server.
-func TestSettingsAPIDoesNotExposeHooks(t *testing.T) {
+func TestSettingsAPIDoesNotExposeHooksOrActions(t *testing.T) {
 	key := []byte("test-signing-key")
 	perm := users.Permissions{Admin: true}
 	st := scopedUserStorage(t, t.TempDir(), perm, key)
 
 	hooks := map[string][]string{"after_upload": {"/usr/local/bin/scan $FILE"}}
-	if err := st.Settings.Save(&settings.Settings{Key: key, Hooks: hooks}); err != nil {
+	actions := map[string]string{"ls": "/bin/ls -- $FILES"}
+	if err := st.Settings.Save(&settings.Settings{Key: key, Hooks: hooks, Actions: actions}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -36,13 +37,13 @@ func TestSettingsAPIDoesNotExposeHooks(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
 		t.Fatal(err)
 	}
-	for _, field := range []string{"hooks", "commands"} {
+	for _, field := range []string{"hooks", "commands", "actions", "shell"} {
 		if _, ok := got[field]; ok {
 			t.Errorf("GET settings exposes %q", field)
 		}
 	}
 
-	body := `{"hooks":{"after_upload":["touch /tmp/pwned"]},"commands":{"after_upload":["touch /tmp/pwned"]},"minimumPasswordLength":12}`
+	body := `{"actions":{"ls":"/bin/sh -c id","sh":"/bin/sh"},"shell":["sh","-c"],"hooks":{"after_upload":["touch /tmp/pwned"]},"commands":{"after_upload":["touch /tmp/pwned"]},"minimumPasswordLength":12}`
 	req, _ = http.NewRequest(http.MethodPut, "/", strings.NewReader(body))
 	req.Header.Set("X-Auth", signToken(t, perm, key))
 	rec = httptest.NewRecorder()
@@ -57,6 +58,9 @@ func TestSettingsAPIDoesNotExposeHooks(t *testing.T) {
 	}
 	if !reflect.DeepEqual(saved.Hooks["after_upload"], hooks["after_upload"]) {
 		t.Errorf("hooks changed over HTTP: %v", saved.Hooks["after_upload"])
+	}
+	if !reflect.DeepEqual(saved.Actions, actions) {
+		t.Errorf("actions changed over HTTP: %v", saved.Actions)
 	}
 	if saved.HasLegacyCommands() {
 		t.Errorf("legacy commands written over HTTP: %v", saved.Commands)

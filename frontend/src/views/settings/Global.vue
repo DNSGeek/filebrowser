@@ -48,17 +48,6 @@
           <p class="small">{{ t("settings.globalRules") }}</p>
           <rules v-model:rules="settings.rules" />
 
-          <div v-if="enableExec">
-            <h3>{{ t("settings.executeOnShell") }}</h3>
-            <p class="small">{{ t("settings.executeOnShellDescription") }}</p>
-            <input
-              class="input input--block"
-              type="text"
-              placeholder="bash -c, cmd /c, ..."
-              v-model="shellValue"
-            />
-          </div>
-
           <h3>{{ t("settings.branding") }}</h3>
 
           <i18n-t
@@ -200,7 +189,6 @@ import Rules from "@/components/settings/Rules.vue";
 import Themes from "@/components/settings/Themes.vue";
 import UserForm from "@/components/settings/UserForm.vue";
 import { useLayoutStore } from "@/stores/layout";
-import { enableExec } from "@/utils/constants";
 import { getTheme, setTheme } from "@/utils/theme";
 import Errors from "@/views/Errors.vue";
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
@@ -211,8 +199,6 @@ const originalSettings = ref<ISettings | null>(null);
 const settings = ref<ISettings | null>(null);
 const debounceTimeout = ref<number | null>(null);
 const pendingChunkSize = ref<string | null>(null);
-
-const shellValue = ref<string>("");
 
 const $showError = inject<IToastError>("$showError")!;
 const $showSuccess = inject<IToastSuccess>("$showSuccess")!;
@@ -263,20 +249,7 @@ const applyChunkSize = () => {
 const save = async () => {
   if (settings.value === null) return false;
   applyChunkSize();
-  const newSettings: ISettings = {
-    ...settings.value,
-    shell:
-      settings.value?.shell
-        .join(" ")
-        .trim()
-        .split(" ")
-        .filter((s: string) => s !== "") ?? [],
-  };
-
-  newSettings.shell = shellValue.value
-    .trim()
-    .split(" ")
-    .filter((s) => s !== "");
+  const newSettings: ISettings = { ...settings.value };
 
   if (newSettings.branding.theme !== getTheme()) {
     setTheme(newSettings.branding.theme);
@@ -339,7 +312,6 @@ onMounted(async () => {
 
     originalSettings.value = original;
     settings.value = newSettings;
-    shellValue.value = newSettings.shell.join(" ");
   } catch (err) {
     if (err instanceof Error) {
       error.value = err;

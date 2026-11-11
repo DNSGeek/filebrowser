@@ -273,7 +273,7 @@
     },
     "user": "User",
     "userCommands": "Commands",
-    "userCommandsHelp": "A space separated list with the available commands for this user. Example:\n",
+    "userCommandsHelp": "A space separated list with the names of the actions this user can run. Actions are defined on the server with 'filebrowser actions add'. Example:\n",
     "userCreated": "User created!",
     "userDefaults": "User default settings",
     "userDeleted": "User deleted!",

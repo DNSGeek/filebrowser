@@ -72,12 +72,9 @@ func TestHookExpandsWholeArguments(t *testing.T) {
 	}
 }
 
-// The "shell" setting can be changed from the web interface. Hooks must not go
-// through it: with one configured, a hook holding shell syntax is still run as
-// a plain program with plain arguments.
-func TestHookIgnoresConfiguredShell(t *testing.T) {
+// A hook holding shell syntax is run as a plain program with plain arguments.
+func TestHookIsNotRunThroughAShell(t *testing.T) {
 	r, user, dir := hookRunner(t, &settings.Settings{
-		Shell: []string{"sh", "-c"},
 		Hooks: map[string][]string{"after_upload": {`true ; touch pwned`}},
 	})
 

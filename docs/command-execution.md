@@ -5,7 +5,7 @@ File Browser can run commands on the host in two separate ways. They have differ
 | Feature           | Default  | Flag                   | Who decides what runs                               |
 | ----------------- | -------- | ---------------------- | --------------------------------------------------- |
 | Event hooks       | enabled  | `--disable-hooks`      | Only whoever can run `filebrowser cmds` on the host |
-| Interactive shell | disabled | `--disable-exec=false` | Administrators, in the web interface                |
+| Interactive shell | disabled | `--disable-exec=false` | Only whoever can run `filebrowser actions` on host  |
 
 ## Event Hooks
 
@@ -35,7 +35,7 @@ Stop File Browser before running `filebrowser cmds`, as the database can only be
 
 ### How hooks run
 
-A hook is split into a program and its arguments and started directly. It never goes through a shell, so pipes, redirections, `;`, `&&` and command substitutions are not available. The **shell** setting does not apply to hooks.
+A hook is split into a program and its arguments and started directly. It never goes through a shell, so pipes, redirections, `;`, `&&` and command substitutions are not available. There is no shell setting any more.
 
 These variables describe the event:
 
@@ -80,13 +80,64 @@ Review them, then add the ones you want again with `filebrowser cmds add`, adjus
 
 > [!CAUTION]
 >
-> The interactive shell is disabled by default due to continuous and known security vulnerabilities. A user who may run a command can read and change anything the File Browser process can, regardless of their scope. Only enable it if you are aware of the risks. For more information, consult issue [#5199](https://github.com/filebrowser/filebrowser/issues/5199).
+> The interactive shell is disabled by default. It lets users start programs on the host, and File Browser controls only which program runs and which files it is given, not what the program then does. Read [Choosing safe actions](#choosing-safe-actions) before enabling it. Background: issue [#5199](https://github.com/filebrowser/filebrowser/issues/5199).
 
-Within File Browser you can toggle the shell (`< >` icon at the top right) and this will open a shell command window at the bottom of the screen. This functionality can be turned on using the environment variable `FB_DISABLE_EXEC=false` or the flag `--disable-exec=false`.
+Within File Browser you can toggle the shell (`< >` icon at the top right) and this will open a command window at the bottom of the screen. This functionality can be turned on using the environment variable `FB_DISABLE_EXEC=false` or the flag `--disable-exec=false`.
 
-By default no commands are available as the command list is empty. To enable commands these need to either be done on a per-user basis (including for the Admin user).
+Despite the name, it is not a shell. A user can only start an **action**: a command the operator defined in advance, by name, followed by the files to run it on.
 
-You can do this by adding them in Settings > User Management > (edit user) > Commands or to _apply to all new users created from that point forward_ they can be set in Settings > Global Settings
+### Defining actions
+
+Actions are managed only from the command line, on the machine File Browser runs on:
+
+```bash
+filebrowser actions add ls '/bin/ls -la -- $FILES'
+filebrowser actions add unzip '/usr/bin/unzip -n -- $FILES'
+filebrowser actions rm unzip
+filebrowser actions ls
+```
+
+Like hooks, they cannot be read or changed from the web interface or the HTTP API. Stop File Browser before running `filebrowser actions`.
+
+An action is a program followed by fixed arguments:
+
+- The program must be given by its **absolute path**.
+- It is started directly, never through a shell. The `--shell` option of earlier versions is ignored.
+- One argument may be `$FILES`. It is replaced by the files the user names. Without it, the user cannot pass anything.
+- Put `--` before `$FILES` whenever the program supports it.
+
+### Allowing users to run actions
+
+A user can run an action when its name is in their command list: Settings > User Management > (edit user) > Commands, or Settings > Global Settings for the default applied to new users. The user also needs the **Execute** permission.
+
+A name in a user's command list that matches no action does nothing, so command lists from earlier versions grant nothing until you define actions with those names.
+
+### What a user can type
+
+The first word is the action's name. Every other word is taken as a file name, relative to the directory the user is browsing (or to the root of their scope if it starts with `/`):
+
+```
+ls
+ls photos "holiday 2026"
+unzip archive.zip
+```
+
+Each name is passed to the program as the full path of that file on disk, and only if the user may reach it: it must be inside their scope, must not lead out of it through a symbolic link (unless `--followExternalSymlinks` is set), and must not be denied by a rule. Otherwise the command is refused.
+
+This means a user cannot add options (`ls -R` looks for a file named `-R`), cannot name files outside their scope, and cannot use shell syntax, wildcards or pipes.
+
+The program runs in the directory the user is browsing, with a minimal environment that excludes File Browser's own settings and secrets, for at most ten minutes.
+
+### Choosing safe actions
+
+File Browser decides which program starts and which paths it receives. It does not sandbox the program. Before defining an action, consider what the program does with files the user controls:
+
+- **Programs that run other programs or load code from the files they process are equivalent to giving the user a shell.** Examples: `git` (hooks and configuration inside the repository), `make`, `find` with `-exec`, interpreters such as `sh`, `python` or `node`, and editors.
+- **Programs that descend into directories** are not checked against rules or symbolic links below the paths the user named. `ls -R`, `tar` or `cp -r` on a directory will reach files that a rule hides from that user, and may follow symbolic links that point outside the scope.
+- **Programs that extract archives** can create symbolic links and, depending on the tool and its options, write outside the target directory.
+- Every action runs as the user File Browser runs as, with that user's access to the whole host.
+
+Prefer narrow actions with fixed options, run File Browser unprivileged in a container that mounts only the served directory, and leave the feature disabled if you do not need it.
 
 > [!NOTE]
 >

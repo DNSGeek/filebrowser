@@ -92,8 +92,8 @@ func (s *Storage) Save(set *Settings) error {
 		set.Rules = []rules.Rule{}
 	}
 
-	if set.Shell == nil {
-		set.Shell = []string{}
+	if set.Actions == nil {
+		set.Actions = map[string]string{}
 	}
 
 	if set.Hooks == nil {

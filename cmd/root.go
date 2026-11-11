@@ -376,9 +376,9 @@ func getServerSettings(v *viper.Viper, st *storage.Storage) (*settings.Server, e
 
 	if server.EnableExec {
 		log.Println("WARNING: Command Runner feature enabled!")
-		log.Println("WARNING: This feature has known security vulnerabilities and should not")
-		log.Println("WARNING: you fully understand the risks involved. For more information")
-		log.Println("WARNING: read https://github.com/filebrowser/filebrowser/issues/5199")
+		log.Println("WARNING: Users can run the actions defined with 'filebrowser actions' on the")
+		log.Println("WARNING: files in their scope. What those programs then do is not confined.")
+		log.Println("WARNING: Read docs/command-execution.md before defining an action.")
 	}
 
 	if server.FollowExternalSymlinks {
@@ -461,7 +461,6 @@ func quickSetup(v *viper.Viper, s *storage.Storage) error {
 			RetryCount: settings.DefaultTusRetryCount,
 		},
 		Hooks: nil,
-		Shell: nil,
 		Rules: nil,
 	}
 

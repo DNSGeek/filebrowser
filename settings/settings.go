@@ -38,13 +38,17 @@ type Settings struct {
 	// Commands is where hooks were stored while they could be edited from the
 	// web interface. It is kept so an operator can review and re-add them, and
 	// is never executed.
-	Commands              map[string][]string `json:"commands,omitempty"`
-	Shell                 []string            `json:"shell"`
-	Rules                 []rules.Rule        `json:"rules"`
-	MinimumPasswordLength uint                `json:"minimumPasswordLength"`
-	FileMode              fs.FileMode         `json:"fileMode"`
-	DirMode               fs.FileMode         `json:"dirMode"`
-	HideDotfiles          bool                `json:"hideDotfiles"`
+	Commands map[string][]string `json:"commands,omitempty"`
+	// Actions are the commands users can start from the command runner, by
+	// name. Like hooks, they can only be changed from the command line
+	// ("filebrowser actions"). A user may run the actions named in their
+	// Commands list.
+	Actions               map[string]string `json:"actions"`
+	Rules                 []rules.Rule      `json:"rules"`
+	MinimumPasswordLength uint              `json:"minimumPasswordLength"`
+	FileMode              fs.FileMode       `json:"fileMode"`
+	DirMode               fs.FileMode       `json:"dirMode"`
+	HideDotfiles          bool              `json:"hideDotfiles"`
 }
 
 // HasLegacyCommands reports whether hooks defined through the old,
