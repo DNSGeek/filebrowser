@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -54,12 +55,16 @@ including 'index_end'.`,
 			}
 		}
 
-		s.Commands[evt] = append(s.Commands[evt][:i], s.Commands[evt][f+1:]...)
+		if i < 0 || f < i || f >= len(s.Hooks[evt]) {
+			return fmt.Errorf("no command at that index for %q", evt)
+		}
+
+		s.Hooks[evt] = append(s.Hooks[evt][:i], s.Hooks[evt][f+1:]...)
 		err = st.Settings.Save(s)
 		if err != nil {
 			return err
 		}
-		printEvents(s.Commands)
+		printEvents(s.Hooks)
 		return nil
 	}, storeOptions{}),
 }

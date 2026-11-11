@@ -190,58 +190,6 @@
         </div>
       </form>
     </div>
-
-    <div class="column">
-      <form v-if="enableExec" class="card" @submit.prevent="save">
-        <div class="card-title">
-          <h2>{{ t("settings.commandRunner") }}</h2>
-        </div>
-
-        <div class="card-content">
-          <i18n-t
-            keypath="settings.commandRunnerHelp"
-            tag="p"
-            class="small"
-            scope="global"
-          >
-            <code>FILE</code>
-            <code>SCOPE</code>
-            <a
-              class="link"
-              target="_blank"
-              href="https://github.com/DNSGeek/filebrowser/blob/master/docs/command-execution.md#hook-runner"
-              >{{ t("settings.documentation") }}</a
-            >
-          </i18n-t>
-
-          <div
-            v-for="(command, key) in settings.commands"
-            :key="key"
-            class="collapsible"
-          >
-            <input :id="key" type="checkbox" />
-            <label :for="key">
-              <p>{{ capitalize(key) }}</p>
-              <i class="material-icons">arrow_drop_down</i>
-            </label>
-            <div class="collapse">
-              <textarea
-                class="input input--block input--textarea"
-                v-model.trim="commandObject[key]"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-action">
-          <input
-            class="button button--flat"
-            type="submit"
-            :value="t('buttons.update')"
-          />
-        </div>
-      </form>
-    </div>
   </div>
 </template>
 
@@ -264,9 +212,6 @@ const settings = ref<ISettings | null>(null);
 const debounceTimeout = ref<number | null>(null);
 const pendingChunkSize = ref<string | null>(null);
 
-const commandObject = ref<{
-  [key: string]: string[] | string;
-}>({});
 const shellValue = ref<string>("");
 
 const $showError = inject<IToastError>("$showError")!;
@@ -315,18 +260,6 @@ const applyChunkSize = () => {
 };
 
 // Define funcs
-const capitalize = (name: string, where: string | RegExp = "_") => {
-  if (where === "caps") where = /(?=[A-Z])/;
-  const split = name.split(where);
-  name = "";
-
-  for (let i = 0; i < split.length; i++) {
-    name += split[i].charAt(0).toUpperCase() + split[i].slice(1) + " ";
-  }
-
-  return name.slice(0, -1);
-};
-
 const save = async () => {
   if (settings.value === null) return false;
   applyChunkSize();
@@ -338,25 +271,8 @@ const save = async () => {
         .trim()
         .split(" ")
         .filter((s: string) => s !== "") ?? [],
-    commands: {},
   };
 
-  const keys = Object.keys(settings.value.commands) as Array<
-    keyof SettingsCommand
-  >;
-  for (const key of keys) {
-    // not sure if we can safely assume non-null
-    const newValue = commandObject.value[key];
-    if (!newValue) continue;
-
-    if (Array.isArray(newValue)) {
-      newSettings.commands[key] = newValue;
-    } else if (key in commandObject.value) {
-      newSettings.commands[key] = newValue
-        .split("\n")
-        .filter((cmd: string) => cmd !== "");
-    }
-  }
   newSettings.shell = shellValue.value
     .trim()
     .split(" ")
@@ -419,13 +335,7 @@ onMounted(async () => {
   try {
     layoutStore.loading = true;
     const original: ISettings = await api.get();
-    const newSettings: ISettings = { ...original, commands: {} };
-
-    const keys = Object.keys(original.commands) as Array<keyof SettingsCommand>;
-    for (const key of keys) {
-      newSettings.commands[key] = original.commands[key];
-      commandObject.value[key] = original.commands[key]!.join("\n");
-    }
+    const newSettings: ISettings = { ...original };
 
     originalSettings.value = original;
     settings.value = newSettings;

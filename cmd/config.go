@@ -226,6 +226,7 @@ func printSettings(ser *settings.Server, set *settings.Settings, auther auth.Aut
 	fmt.Fprintf(w, "\tTLS Key:\t%s\n", ser.TLSKey)
 	fmt.Fprintf(w, "\tToken Expiration Time:\t%s\n", ser.TokenExpirationTime)
 	fmt.Fprintf(w, "\tExec Enabled:\t%t\n", ser.EnableExec)
+	fmt.Fprintf(w, "\tHooks Enabled:\t%t\n", !ser.DisableHooks)
 	fmt.Fprintf(w, "\tThumbnails Enabled:\t%t\n", ser.EnableThumbnails)
 	fmt.Fprintf(w, "\tResize Preview:\t%t\n", ser.ResizePreview)
 	fmt.Fprintf(w, "\tType Detection by Header:\t%t\n", ser.TypeDetectionByHeader)
@@ -332,6 +333,8 @@ func getSettings(flags *pflag.FlagSet, set *settings.Settings, ser *settings.Ser
 		case "disableExec":
 			ser.EnableExec, err = flags.GetBool(flag.Name)
 			ser.EnableExec = !ser.EnableExec
+		case "disableHooks":
+			ser.DisableHooks, err = flags.GetBool(flag.Name)
 		case "disableTypeDetectionByHeader":
 			ser.TypeDetectionByHeader, err = flags.GetBool(flag.Name)
 			ser.TypeDetectionByHeader = !ser.TypeDetectionByHeader

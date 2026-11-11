@@ -21,23 +21,41 @@ type AuthMethod string
 
 // Settings contain the main settings of the application.
 type Settings struct {
-	Key                   []byte              `json:"key"`
-	Signup                bool                `json:"signup"`
-	HideLoginButton       bool                `json:"hideLoginButton"`
-	CreateUserDir         bool                `json:"createUserDir"`
-	UserHomeBasePath      string              `json:"userHomeBasePath"`
-	Defaults              UserDefaults        `json:"defaults"`
-	AuthMethod            AuthMethod          `json:"authMethod"`
-	LogoutPage            string              `json:"logoutPage"`
-	Branding              Branding            `json:"branding"`
-	Tus                   Tus                 `json:"tus"`
-	Commands              map[string][]string `json:"commands"`
+	Key              []byte       `json:"key"`
+	Signup           bool         `json:"signup"`
+	HideLoginButton  bool         `json:"hideLoginButton"`
+	CreateUserDir    bool         `json:"createUserDir"`
+	UserHomeBasePath string       `json:"userHomeBasePath"`
+	Defaults         UserDefaults `json:"defaults"`
+	AuthMethod       AuthMethod   `json:"authMethod"`
+	LogoutPage       string       `json:"logoutPage"`
+	Branding         Branding     `json:"branding"`
+	Tus              Tus          `json:"tus"`
+	// Hooks are the commands run before and after file events. They can only
+	// be changed from the command line ("filebrowser cmds"), never over HTTP,
+	// so that defining what runs on the host takes access to the host.
+	Hooks map[string][]string `json:"hooks"`
+	// Commands is where hooks were stored while they could be edited from the
+	// web interface. It is kept so an operator can review and re-add them, and
+	// is never executed.
+	Commands              map[string][]string `json:"commands,omitempty"`
 	Shell                 []string            `json:"shell"`
 	Rules                 []rules.Rule        `json:"rules"`
 	MinimumPasswordLength uint                `json:"minimumPasswordLength"`
 	FileMode              fs.FileMode         `json:"fileMode"`
 	DirMode               fs.FileMode         `json:"dirMode"`
 	HideDotfiles          bool                `json:"hideDotfiles"`
+}
+
+// HasLegacyCommands reports whether hooks defined through the old,
+// web-editable setting are still stored. They are not run.
+func (s *Settings) HasLegacyCommands() bool {
+	for _, cmds := range s.Commands {
+		if len(cmds) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // GetRules implements rules.Provider.
@@ -47,17 +65,20 @@ func (s *Settings) GetRules() []rules.Rule {
 
 // Server specific settings.
 type Server struct {
-	Root                   string `json:"root"`
-	BaseURL                string `json:"baseURL"`
-	Socket                 string `json:"socket"`
-	TLSKey                 string `json:"tlsKey"`
-	TLSCert                string `json:"tlsCert"`
-	Port                   string `json:"port"`
-	Address                string `json:"address"`
-	Log                    string `json:"log"`
-	EnableThumbnails       bool   `json:"enableThumbnails"`
-	ResizePreview          bool   `json:"resizePreview"`
-	EnableExec             bool   `json:"enableExec"`
+	Root             string `json:"root"`
+	BaseURL          string `json:"baseURL"`
+	Socket           string `json:"socket"`
+	TLSKey           string `json:"tlsKey"`
+	TLSCert          string `json:"tlsCert"`
+	Port             string `json:"port"`
+	Address          string `json:"address"`
+	Log              string `json:"log"`
+	EnableThumbnails bool   `json:"enableThumbnails"`
+	ResizePreview    bool   `json:"resizePreview"`
+	EnableExec       bool   `json:"enableExec"`
+	// DisableHooks turns the event hooks off. It is stored negated so that
+	// databases written before the field existed read as "hooks enabled".
+	DisableHooks           bool   `json:"disableHooks"`
 	TypeDetectionByHeader  bool   `json:"typeDetectionByHeader"`
 	ImageResolutionCal     bool   `json:"imageResolutionCalculation"`
 	AuthHook               string `json:"authHook"`

@@ -20,26 +20,6 @@ const shellMetachars = ";&|<>()$`^%\n\r"
 var ErrShellMetachars = errors.New("command contains characters that are not allowed: " +
 	"; & | < > ( ) $ ` ^ % and line breaks")
 
-// ParseCommand parses the command taking in account if the current
-// instance uses a shell to run the commands or just calls the binary
-// directly.
-func ParseCommand(s *settings.Settings, raw string) (command []string, name string, err error) {
-	name, args, err := SplitCommandAndArgs(raw)
-	if err != nil {
-		return
-	}
-
-	if usesShell(s) {
-		command = append(command, s.Shell...)
-		command = append(command, raw)
-	} else {
-		command = append(command, name)
-		command = append(command, args...)
-	}
-
-	return command, name, nil
-}
-
 // ParseUserCommand parses a command issued by a user through the command
 // runner, checks it against the user's allowed commands and returns the
 // program to execute and its arguments.

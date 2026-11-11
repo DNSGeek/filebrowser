@@ -16,12 +16,13 @@ Published advisories are listed under [security advisories](https://github.com/D
 and reporting instructions are in [SECURITY.md](SECURITY.md). One known issue class
 remains only partly addressed:
 
-- **Command execution, runner, and hooks.** This feature is plagued with vulnerabilities across many published advisories, and would need a full rewrite to be made safe. It is disabled by default; if you re-enable it with `--disable-exec=false`, treat the ability to run commands as equivalent to shell access on the host. Background: [#5199](https://github.com/filebrowser/filebrowser/issues/5199). _Added some safety checks._
+- **Interactive command runner.** A user who may run a command can read and change anything the File Browser process can, whatever their scope, and this cannot be fixed without a redesign. It is disabled by default; if you re-enable it with `--disable-exec=false`, treat the ability to run commands as equivalent to shell access on the host. Background: [#5199](https://github.com/filebrowser/filebrowser/issues/5199). _Added some safety checks._
+- **Event hooks.** Redesigned: hooks are defined only from the command line on the host, never from the web interface, and run without a shell. They are enabled by default, with none defined. Hooks stored by earlier versions are not run until re-added. See [`docs/command-execution.md`](docs/command-execution.md).
 
 Hardening guidance:
 
 - **Do not expose it directly to the internet.** Put it behind a reverse proxy that terminates TLS and performs its own authentication.
-- **Keep the command runner disabled.** It is off by default, so leave it off. See [#5199](https://github.com/filebrowser/filebrowser/issues/5199) and [`docs/command-execution.md`](docs/command-execution.md).
+- **Keep the interactive command runner disabled.** It is off by default, so leave it off. See [#5199](https://github.com/filebrowser/filebrowser/issues/5199) and [`docs/command-execution.md`](docs/command-execution.md).
 - **Run it unprivileged, inside a container**, with only the directory you intend to serve mounted into it.
 
 ## Documentation
